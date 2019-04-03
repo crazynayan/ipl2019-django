@@ -1,0 +1,10 @@
+__pycache__
+*.swp
+*.sqlite3
+env/
+.idea/
+/static
+.gcloudignore
+secret_key.txt
+dbpassword.txt
+test.adoc
