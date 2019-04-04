@@ -15,6 +15,10 @@ class Member(models.Model):
 
     class Meta:
         ordering = ['-points']
+        permissions = (
+            ("auctioneer", "Auctioneer"),
+            ("can_play_ipl2019", "Can play IPL 2019"),
+        )
 
 
 @receiver(post_save, sender=User)
