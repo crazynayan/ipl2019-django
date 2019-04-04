@@ -2,50 +2,50 @@ Fantasy League Design
 ======================
 
 == REST API
-=== API for normal users
-. /users
+=== API for normal members
+. /members
 .. Shows the league status.
 ... rank (Calculated)
-... userLeague.name
-... userLeague.balance
-... userLeague.points
+... member.name
+... member.balance
+... member.points
 ... numeberOfPlayerPurchased  (Calculated)
 .. Order by highest points.
-. /users/{userInitial}/players
-.. Shows the players owned by that user.
+. /members/{memberInitial}/players
+.. Shows the players owned by that member.
 ... playerInstance.player.name
-... playerInstance.score
-... playerInstance.pice
+... playerInstance.player.score
+... playerInstance.price
 ... playerInstance.player.type
 ... playerInstance.player.team
 ... playerInstance.player.country
 .. Order by highest player score.
 .. In the list, an option is provide to release player (which are eligible for release)
-. /users/{userInitial}/players/{playerInstanceNumber}
+. /members/{memberInitial}/players/{playerInstanceNumber}
 .. This is a form to release a player. (PUT)
-... playerInstance.userInitial = None
+... playerInstance.memberInitial = None
 ... playerInstance.status = AVAILABLE
-... userLeague.points -= playerInstance.score
-... userLeague.balance += playerInstance.price
+... member.points -= playerInstance.score
+... member.balance += playerInstance.price
 ... playerInstance.price = 0
 .. Shows the details of 1 player owned by player and ask confirmation of release.
-. /users/{userInitial}/bids
+. /members/{memberInitial}/bids
 .. This is a form to submit a bid. (POST)
 .. Shows the details of 1 player for whom the bid is required.
 .. The bid should only be accepted once.
 .. If all players have submitted a bid then do further updates
-... playerInstance.userInitial = User with the highest bid for that player
+... playerInstance.memberInitial = Member with the highest bid for that player
 ... playerInstance.price = Second Highest bid amount for that player
 ... playerInstance.status = PURCHASED
-... userLeague.balance -= playerInstance.price
-... userLeague.points += playerInstance.score
-.. It will also show the list of users who still needs to submit the bid.
+... member.balance -= playerInstance.price
+... member.points += playerInstance.score
+.. It will also show the list of members who still needs to submit the bid.
 . /bids
 .. Shows all bids for PURCHASED players
 .. Order by date and then playerInstanceNumber
 .. Also shows who has won the bid
 
-=== API for users with auctioneer permission
+=== API for members with auctioneer permission
 . /auction
 .. Shows the players available for auction
 .. Order by highest player score
@@ -57,12 +57,11 @@ Fantasy League Design
 .. Will confirm whether a player's bid needs to be accepted
 .. Will throw an exception if the BID is already in progress
 . /league
-.. This will calculate the points of all users in userLeague
-.. And show the same view as the /users
+.. This will calculate the points of all members in member
+.. And show the same view as the /members
 . /auction/{playerInstanceNumber}/bids
-.. Will show all users and their status whether they have bid or not
+.. Will show all members and their status whether they have bid or not
 .. Will provide an option to submit bid on someone's behalf
-.. Redirect to /users/{userInitial}/bids form
-
+.. Redirect to /members/{memberInitial}/bids form
 
 

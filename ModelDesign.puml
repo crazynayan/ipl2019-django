@@ -1,7 +1,7 @@
 @startuml
 !define primary_key(x) <b><u>x</u></b>
 !define foreign_key(x) <color:blue>x</color>
-class UserLeague {
+class Member {
     primary_key(initial)
     name
     points
@@ -14,7 +14,6 @@ class Player {
     team
     country
     type
-    potential
     score
 }
 
@@ -30,8 +29,6 @@ note right
     Only one playerInstance can have a BID status
 end note
 
-Player::name "1" --> "2" PlayerInstance::playerName
-UserLeague::initial "1" --> "Many" PlayerInstance::userInitial : can own
 
 class Bid {
     primary_key(id)
@@ -41,6 +38,8 @@ class Bid {
     amount
 }
 
-UserLeague "1" --> "Many" Bid
-PlayerInstance "1" --> "Many" Bid
+Player::name "1" ---> "2" PlayerInstance::playerName : can have
+Member::initial "1" ---> "Many" PlayerInstance::userInitial : can own
+Member::initial "1" ---> "Many" Bid::userInitial : can make
+PlayerInstance::number "1" ---> "Many" Bid::playerInstanceNumber : can have
 @enduml
