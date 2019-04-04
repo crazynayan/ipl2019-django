@@ -1,0 +1,46 @@
+@startuml
+!define primary_key(x) <b><u>x</u></b>
+!define foreign_key(x) <color:blue>x</color>
+class UserLeague {
+    primary_key(initial)
+    name
+    points
+    balance
+}
+class Player {
+    primary_key(name)
+    iplCost
+    basePrice
+    team
+    country
+    type
+    potential
+    score
+}
+
+class PlayerInstance {
+    primary_key(number)
+    foreign_key(playerName)
+    foreign_key(userInitial)
+    status
+    price
+}
+note right
+    status can be AVAILABLE, PURCHASED, BID
+    Only one playerInstance can have a BID status
+end note
+
+Player::name "1" --> "2" PlayerInstance::playerName
+UserLeague::initial "1" --> "Many" PlayerInstance::userInitial : can own
+
+class Bid {
+    primary_key(id)
+    foreign_key(userInitial)
+    foreign_key(playerInstanceNumber)
+    bidDate
+    amount
+}
+
+UserLeague "1" --> "Many" Bid
+PlayerInstance "1" --> "Many" Bid
+@enduml

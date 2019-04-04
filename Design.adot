@@ -1,0 +1,68 @@
+Fantasy League Design
+======================
+
+== REST API
+=== API for normal users
+. /users
+.. Shows the league status.
+... rank (Calculated)
+... userLeague.name
+... userLeague.balance
+... userLeague.points
+... numeberOfPlayerPurchased  (Calculated)
+.. Order by highest points.
+. /users/{userInitial}/players
+.. Shows the players owned by that user.
+... playerInstance.player.name
+... playerInstance.score
+... playerInstance.pice
+... playerInstance.player.type
+... playerInstance.player.team
+... playerInstance.player.country
+.. Order by highest player score.
+.. In the list, an option is provide to release player (which are eligible for release)
+. /users/{userInitial}/players/{playerInstanceNumber}
+.. This is a form to release a player. (PUT)
+... playerInstance.userInitial = None
+... playerInstance.status = AVAILABLE
+... userLeague.points -= playerInstance.score
+... userLeague.balance += playerInstance.price
+... playerInstance.price = 0
+.. Shows the details of 1 player owned by player and ask confirmation of release.
+. /users/{userInitial}/bids
+.. This is a form to submit a bid. (POST)
+.. Shows the details of 1 player for whom the bid is required.
+.. The bid should only be accepted once.
+.. If all players have submitted a bid then do further updates
+... playerInstance.userInitial = User with the highest bid for that player
+... playerInstance.price = Second Highest bid amount for that player
+... playerInstance.status = PURCHASED
+... userLeague.balance -= playerInstance.price
+... userLeague.points += playerInstance.score
+.. It will also show the list of users who still needs to submit the bid.
+. /bids
+.. Shows all bids for PURCHASED players
+.. Order by date and then playerInstanceNumber
+.. Also shows who has won the bid
+
+=== API for users with auctioneer permission
+. /auction
+.. Shows the players available for auction
+.. Order by highest player score
+.. In the list, an option is provide to invite bid player.
+.. This option is disabled if the bid is already in progress
+. /auction/{playerInstanceNumber}
+.. This is a form to invite a bid. (PUT)
+... playerInstance.status = BID
+.. Will confirm whether a player's bid needs to be accepted
+.. Will throw an exception if the BID is already in progress
+. /league
+.. This will calculate the points of all users in userLeague
+.. And show the same view as the /users
+. /auction/{playerInstanceNumber}/bids
+.. Will show all users and their status whether they have bid or not
+.. Will provide an option to submit bid on someone's behalf
+.. Redirect to /users/{userInitial}/bids form
+
+
+
