@@ -2,13 +2,12 @@
 !define primary_key(x) <b><u>x</u></b>
 !define foreign_key(x) <color:blue>x</color>
 class Member {
-    primary_key(initial)
     name
     points
     balance
 }
 class Player {
-    primary_key(name)
+    name
     iplCost
     basePrice
     team

@@ -3,15 +3,6 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# Create your models here.
-
-# class Member {
-# primary_key(initial)
-# name
-# points
-# balance
-# }
-
 
 class Member(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -21,6 +12,9 @@ class Member(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['-points']
 
 
 @receiver(post_save, sender=User)
