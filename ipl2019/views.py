@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Member
-
+from django.contrib import messages
 
 
 class MemberView(LoginRequiredMixin, View):
@@ -27,16 +27,24 @@ def member_upload(request):
     prompt = {
         'order': 'Order of member csv should be user, name, balance, points'
     }
+
     if request.method == "GET":
         return render(request, template, prompt)
 
-    csv_file = request.FILES['file']
+    file = request.FILES['file']
 
-    data_set = csv_file.read().decode('utf-8')
-    io_string = io.StringIO(data_set)
-    next(io_string)
+    if not file.name.endswith('.csv'):
+        messages.error(request, "This file is not a .csv file")
+        return render(request, template, prompt)
 
-    for column in csv.reader(io_string, delimiter=',', quotechar="|"):
+    with open(file.name) as csv_file:
+        csv_data = list(csv.reader(csv_file, delimiter=','))
+
+    if csv_data[0] != ['user', 'name', 'balance', 'points']:
+        messages.error(request, "The csv header is not in the proper format.")
+        return render(request, template, prompt)
+
+    for column in csv_data[1:]:
         try:
             user1 = User.objects.get(username=column[0])
             member = Member.objects.get(user=user1.id)
@@ -46,11 +54,6 @@ def member_upload(request):
             member.save()
         except ObjectDoesNotExist:
             pass
-        # if User.objects.filter(username=column[0]).exists():
-        #     userid = User.objects.get(username=column[0]).id
-        #     if Member.objects.filter(user=userid).exists():
-        #         member =
-        #     member = Member.objects.get
         #     _, created = Member.objects.update_or_create(
         #         defaults = {
         #             'name'      : column[1],
