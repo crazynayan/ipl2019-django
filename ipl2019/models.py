@@ -32,3 +32,19 @@ def save_user_member(sender, instance, **kwargs):
     if hasattr(instance, 'Member'):
         instance.member.save()
 
+
+class Player(models.Model):
+    name = models.TextField(max_length=100)
+    cost = models.PositiveIntegerField(default=0)
+    base = models.PositiveIntegerField(default=0)
+    team = models.CharField(max_length=4, blank=True)
+    country = models.TextField(max_length=100)
+    type = models.CharField(max_length=12, blank=True)
+    score = models.DecimalField(max_digits=6, decimal_places=1, default=0)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['-score']
+

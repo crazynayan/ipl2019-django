@@ -1,24 +1,31 @@
-import csv, io
+import csv
 
 from django.shortcuts import render
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Member
+from .models import Member, Player
 from django.contrib import messages
 
 
-class MemberView(LoginRequiredMixin, View):
-    def get(self, request):
-        member_list = Member.objects.all()
-        context = {
-            'member_list': member_list
-        }
-        return render(request, 'ipl2019/member_list.html', context)
+@permission_required('ipl2019.can_play_ipl2019')
+def member_view(request):
+    template = "ipl2019/member_list.html"
+    context = {
+        'member_list': Member.objects.all()
+    }
+    return render(request, template, context)
+
+
+@permission_required('ipl2019.can_play_ipl2019')
+def player_view(request):
+    template = "ipl2019/player_list.html"
+    context = {
+        'player_list': Player.objects.all()
+    }
+    return render(request, template, context)
 
 
 @permission_required('ipl2019.auctioneer')
@@ -54,13 +61,44 @@ def member_upload(request):
             member.save()
         except ObjectDoesNotExist:
             pass
-        #     _, created = Member.objects.update_or_create(
-        #         defaults = {
-        #             'name'      : column[1],
-        #             'balance'   : column[2],
-        #             'points'    : column[3],
-        #             },
-        #         user=userid
-        #     )
 
     return HttpResponseRedirect(reverse('member_list'))
+
+
+@permission_required('ipl2019.auctioneer')
+def player_upload(request):
+    template = "ipl2019/upload_csv.html"
+    prompt = {
+        'order': 'Order of member csv should be name, cost, base, team, country, type, score'
+    }
+
+    if request.method == "GET":
+        return render(request, template, prompt)
+
+    file = request.FILES['file']
+
+    if not file.name.endswith('.csv'):
+        messages.error(request, "This file is not a .csv file")
+        return render(request, template, prompt)
+
+    with open(file.name) as csv_file:
+        csv_data = list(csv.reader(csv_file, delimiter=','))
+
+    if csv_data[0] != ['name', 'cost', 'base', 'team', 'country', 'type', 'score']:
+        messages.error(request, "The csv header is not in the proper format.")
+        return render(request, template, prompt)
+
+    for column in csv_data[1:]:
+        _, created = Player.objects.update_or_create(
+            defaults={
+                'cost': column[1],
+                'base': column[2],
+                'team': column[3],
+                'country': column[4],
+                'type': column[5],
+                'score': column[6],
+                },
+            name=column[0]
+        )
+
+    return HttpResponseRedirect(reverse('player_list'))

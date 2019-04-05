@@ -8,8 +8,8 @@ class Member {
 }
 class Player {
     name
-    iplCost
-    basePrice
+    cost
+    base
     team
     country
     type

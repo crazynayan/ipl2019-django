@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Players{% endblock %}
+{% block content %}
+<h1>IPL Players</h1>
+{% if player_list %}
+<table class="table table-bordered">
+    <thead class="thead-dark">
+        <th scope="col">Number</th>
+        <th scope="col">Name</th>
+        <th scope="col">Score</th>
+        <th scope="col">Team</th>
+        <th scope="col">Type</th>
+        <th scope="col">Country</th>
+        <th scope="col">Base</th>
+        <th scope="col">Cost</th>
+    </thead>
+    <tbody>
+    {% for player in player_list %}
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{player.name}}</td>
+        <td>{{player.score}}</td>
+        <td>{{player.team}}</td>
+        <td>{{player.type}}</td>
+        <td>{{player.country}}</td>
+        <td>{{player.base}}</td>
+        <td>{{player.cost}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>No Players present, please contact the auctioneer.</p>
+{% endif %}
+{% if perms.ipl2019.auctioneer %}
+    <h3><a href="{% url 'player_upload' %}">Upload Player CSV</a></h3>
+{% endif %}
+{% endblock %}
