@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Players{% endblock %}
+{% block content %}
+<h1>IPL Players</h1>
+{% if player_instances %}
+<table class="table table-bordered">
+    <thead class="thead-dark">
+        <th scope="col">Player ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Score</th>
+        <th scope="col">Price</th>
+        <th scope="col">Team</th>
+        <th scope="col">Type</th>
+        <th scope="col">Status</th>
+        <th scope="col">Base</th>
+    </thead>
+    <tbody>
+    {% for player_instance in player_instances %}
+    <tr>
+        <td>{{player_instance.number}}</td>
+        <td>{{player_instance.player.name}}</td>
+        <td>{{player_instance.player.score}}</td>
+        <td>{{player_instance.price}}</td>
+        <td>{{player_instance.player.team}}</td>
+        <td>{{player_instance.player.type}}</td>
+        <td>{{player_instance.status}}</td>
+        <td>{{player_instance.player.base}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>You have not bought any players as yet.</p>
+{% endif %}
+{% if perms.ipl2019.auctioneer %}
+    <h3><a href="{% url 'player_ownership_upload' %}">Upload Player Ownership CSV</a></h3>
+{% endif %}
+{% endblock %}

@@ -48,3 +48,15 @@ class Player(models.Model):
     class Meta:
         ordering = ['-score']
 
+
+class PlayerInstance(models.Model):
+    number = models.PositiveIntegerField(unique=True)
+    player = models.ForeignKey('Player', on_delete=models.CASCADE)
+    member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True)
+    STATUS = (
+        ('Available', 'Available'),
+        ('Purchased', 'Purchased'),
+        ('Bidding', 'Bidding'),
+    )
+    status = models.CharField(max_length=10, choices=STATUS, default='Available')
+    price = models.PositiveIntegerField(blank=True, default=0)

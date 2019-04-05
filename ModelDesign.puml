@@ -18,27 +18,27 @@ class Player {
 
 class PlayerInstance {
     primary_key(number)
-    foreign_key(playerName)
-    foreign_key(userInitial)
+    foreign_key(player)
+    foreign_key(member)
     status
     price
 }
 note right
-    status can be AVAILABLE, PURCHASED, BID
-    Only one playerInstance can have a BID status
+    status can be Available, Purchased or Bidding
+    Only one playerInstance can have a Bidding status
 end note
 
 
 class Bid {
     primary_key(id)
-    foreign_key(userInitial)
-    foreign_key(playerInstanceNumber)
+    foreign_key(member)
+    foreign_key(playerInstance)
     bidDate
     amount
 }
 
-Player::name "1" ---> "2" PlayerInstance::playerName : can have
-Member::initial "1" ---> "Many" PlayerInstance::userInitial : can own
-Member::initial "1" ---> "Many" Bid::userInitial : can make
-PlayerInstance::number "1" ---> "Many" Bid::playerInstanceNumber : can have
+Player "1" ---> "2" PlayerInstance::player : can have
+Member "1" ---> "Many" PlayerInstance::member : can own
+Member "1" ---> "Many" Bid::member: can make
+PlayerInstance "1" ---> "Many" Bid::playerInstanceNumber : can have
 @enduml
