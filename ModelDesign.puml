@@ -40,5 +40,5 @@ class Bid {
 Player "1" ---> "2" PlayerInstance::player : can have
 Member "1" ---> "Many" PlayerInstance::member : can own
 Member "1" ---> "Many" Bid::member: can make
-PlayerInstance "1" ---> "Many" Bid::playerInstanceNumber : can have
+PlayerInstance "1" ---> "Many" Bid::playerInstance : can have
 @enduml

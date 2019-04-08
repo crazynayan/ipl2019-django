@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Points Difference{% endblock %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+    <strong>{{ message|safe }}</strong>
+</div>
+{% endfor %}
+<hr/>
+{% endif %}
+<h1>Differences in Point Calculations</h1>
+{% if members_with_diff %}
+<table class="table table-bordered">
+    <thead class="thead-dark">
+    <th scope="col">Name</th>
+    <th scope="col">Database Points</th>
+    <th scope="col">Calculated Points</th>
+    </thead>
+    <tbody>
+    {% for member_with_diff in members_with_diff %}
+    <tr>
+        <td>{{member_with_diff.member}}</td>
+        <td>{{member_with_diff.db_points}}</td>
+        <td>{{member_with_diff.calc_points}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No Members with any differences. All looks good!</p>
+{% endif %}
+{% endblock %}

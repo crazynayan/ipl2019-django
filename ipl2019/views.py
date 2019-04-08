@@ -200,6 +200,76 @@ def player_upload(request):
 
 
 @permission_required('ipl2019.auctioneer')
+def update_scores(request):
+    template = "ipl2019/upload_csv.html"
+    prompt = {
+        'order': 'Order of scores csv should be player, score',
+    }
+
+    if request.method == "GET":
+        return render(request, template, prompt)
+
+    file = request.FILES['file']
+
+    if not file.name.endswith('.csv'):
+        messages.error(request, "This file is not a .csv file")
+        return render(request, template, prompt)
+
+    with open(file.name) as csv_file:
+        csv_data = list(csv.reader(csv_file, delimiter=','))
+
+    if csv_data[0] != ['player', 'score']:
+        messages.error(request, "The csv header is not in the proper format.")
+        return render(request, template, prompt)
+
+    for column in csv_data[1:]:
+        try:
+            player = Player.objects.get(name=column[0])
+            score = float(column[1])
+            if player.score != score:
+                # Get the difference (delta) between the new score & old score
+                # to update the leaderboard in the Member class
+                delta = score - float(player.score)
+                # Update player score
+                player.score = score
+                player.save()
+                # Update Leaderboard
+                player_instances = PlayerInstance.objects.filter(player=player)
+                for player_instance in player_instances:
+                    if player_instance.member is not None:
+                        player_instance.member.points = float(player_instance.member.points) + delta
+                        player_instance.member.save()
+        except ObjectDoesNotExist:
+            pass
+        except ValueError:
+            pass
+
+    return HttpResponseRedirect(reverse('member_list'))
+
+
+@permission_required('ipl2019.auctioneer')
+def check_points(request):
+    template = "ipl2019/points.html"
+    members_with_diff = []
+    for member in Member.objects.all():
+        calc_points = 0
+        player_instances = PlayerInstance.objects.filter(member=member)
+        for player_instance in player_instances:
+            calc_points += player_instance.player.score
+        if calc_points != member.points:
+            member_with_diff = {
+                'member': member.name,
+                'db_points': member.points,
+                'calc_points': calc_points,
+            }
+            members_with_diff.append(member_with_diff)
+    context = {
+        'members_with_diff': members_with_diff
+    }
+    return render(request, template, context)
+
+
+@permission_required('ipl2019.auctioneer')
 def player_ownership_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {

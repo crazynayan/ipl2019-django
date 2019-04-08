@@ -10,4 +10,6 @@ urlpatterns = [
     path('my_players/<int:pk>/remove/', views.remove_player, name='remove_player'),
     path('all_players/', views.all_player_view, name='all_player_list'),
     path('player_ownership_upload/', views.player_ownership_upload, name='player_ownership_upload'),
+    path('update_scores/', views.update_scores, name='update_scores'),
+    path('check_points/', views.check_points, name='check_points')
 ]
