@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Confirm{% endblock %}
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+            <strong>{{ message|safe }}</strong>
+        </div>
+    {% endfor %}
+    <hr/>
+{% endif %}
+{% for confirm in confirmations %}
+    <div>
+        <strong>{{confirm}}</strong>
+    </div>
+{% endfor %}
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Yes</button>
+    <button class="btn btn-secondary" onclick="window.location='{% url redirect %}' ; return false;">Cancel</button>
+</form>
+{% endblock %}

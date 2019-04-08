@@ -23,7 +23,7 @@ Fantasy League Design
 .. In the list, an option is provide to release player (which are eligible for release)
 . /members/{memberInitial}/players/{playerInstanceNumber}
 .. This is a form to release a player. (PUT)
-... playerInstance.memberInitial = None
+... playerInstance.member = None
 ... playerInstance.status = AVAILABLE
 ... member.points -= playerInstance.score
 ... member.balance += playerInstance.price

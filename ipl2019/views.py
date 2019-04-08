@@ -1,6 +1,6 @@
 import csv
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
@@ -14,7 +14,7 @@ from django.contrib import messages
 def member_view(request):
     template = "ipl2019/member_list.html"
     context = {
-        'member_list': Member.objects.all()
+        'member_list': Member.objects.all(),
     }
     return render(request, template, context)
 
@@ -23,7 +23,7 @@ def member_view(request):
 def player_view(request):
     template = "ipl2019/player_list.html"
     context = {
-        'player_list': Player.objects.all()
+        'player_list': Player.objects.all(),
     }
     return render(request, template, context)
 
@@ -34,12 +34,13 @@ def my_player_view(request):
     try:
         me = Member.objects.get(user=request.user.id)
         context = {
-            'player_instances': PlayerInstance.objects.filter(member=me).order_by('-player__score')
+            'player_instances': PlayerInstance.objects.filter(member=me).order_by('-player__score'),
+            'balance': me.balance,
         }
     # Only the superuser will not have any ownership. So for superuser display all players.
     except ObjectDoesNotExist:
         context = {
-            'player_instances': PlayerInstance.objects.all().order_by('number')
+            'player_instances': PlayerInstance.objects.all().order_by('number'),
         }
     return render(request, template, context)
 
@@ -48,16 +49,85 @@ def my_player_view(request):
 def all_player_view(request):
     template = "ipl2019/my_player_list.html"
     context = {
-        'player_instances': PlayerInstance.objects.all().order_by('number')
+        'player_instances': PlayerInstance.objects.all().order_by('number'),
     }
     return render(request, template, context)
+
+
+@permission_required('ipl2019.can_play_ipl2019')
+def remove_player(request, pk):
+    template = "ipl2019/confirmation.html"
+    redirect = 'my_player_list'
+    try:
+        player_instance = PlayerInstance.objects.get(pk=pk)
+        confirmations = ['Are you sure you want to remove this player?']
+        confirmations.append(f'Name : {player_instance.player.name}')
+        confirmations.append(f'Score : {player_instance.player.score} points')
+        confirmations.append(f'Price : \u20B9 {player_instance.price} lakhs')
+        confirmations.append(f'Team : {player_instance.player.team}')
+        confirmations.append(f'Type : {player_instance.player.type}')
+        if player_instance.member is not None:
+            confirmations.append(f'Owner : {player_instance.member.name}')
+        else:
+            confirmations.append(f'Owner : Unsold')
+        prompt = {
+            'confirmations': confirmations,
+            'player': player_instance,
+            'redirect': redirect,
+        }
+    except ObjectDoesNotExist:
+        messages.error(request, "You cannot remove a player that does NOT exists.")
+        prompt = {
+            'confirmations': ['This player does NOT exists.'],
+            'player': None,
+            'redirect': redirect,
+        }
+        return render(request, template, prompt)
+
+    if request.method == "GET":
+        return render(request, template, prompt)
+
+    # Validate if the player is owned by anybody
+    if player_instance.member is None:
+        messages.error(request, f'{player_instance.player.name} is not owned by anybody.')
+        messages.error(request, 'You can only release players that are owned.')
+        return render(request, template, prompt)
+
+    # Validate if the member owns the player.
+    try:
+        me = Member.objects.get(user=request.user.id)
+        if player_instance.member.id != me.id:
+            messages.error(request, "You cannot remove this player since you do NOT own him.")
+            return render(request, template, prompt)
+    # Only the superuser will not have any ownership. So allow superuser to remove any player.
+    except ObjectDoesNotExist:
+        pass
+
+    # Validate if the member can release the player
+    if player_instance.player.score >= 50:
+        messages.error(request, f'{player_instance.player.name} has already scored {player_instance.player.score} points.')
+        messages.error(request, 'You can only release players with less than 50 points.')
+        return render(request, template, prompt)
+
+    # Validate
+
+    player_instance.member.balance += player_instance.price
+    player_instance.member.points -= player_instance.player.score
+    player_instance.member.save()
+
+    player_instance.price = 0
+    player_instance.status = 'Available'
+    player_instance.member = None
+    player_instance.save()
+
+    return HttpResponseRedirect(reverse(redirect))
 
 
 @permission_required('ipl2019.auctioneer')
 def member_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of member csv should be user, name, balance, points'
+        'order': 'Order of member csv should be user, name, balance, points',
     }
 
     if request.method == "GET":
@@ -78,8 +148,8 @@ def member_upload(request):
 
     for column in csv_data[1:]:
         try:
-            a_user = User.objects.get(username=column[0])
-            member = Member.objects.get(user=a_user.id)
+            user = User.objects.get(username=column[0])
+            member = Member.objects.get(user=user.id)
             member.name = column[1]
             member.balance = column[2]
             member.points = column[3]
@@ -94,7 +164,7 @@ def member_upload(request):
 def player_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of player csv should be name, cost, base, team, country, type, score'
+        'order': 'Order of player csv should be name, cost, base, team, country, type, score',
     }
 
     if request.method == "GET":
@@ -133,7 +203,7 @@ def player_upload(request):
 def player_ownership_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of player ownership csv should be player, number, member, price'
+        'order': 'Order of player ownership csv should be player, number, member, price',
     }
 
     if request.method == "GET":

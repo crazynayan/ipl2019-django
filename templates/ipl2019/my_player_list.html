@@ -2,29 +2,40 @@
 {% block title %}Players{% endblock %}
 {% block content %}
 <h1>IPL Players</h1>
+{% if balance %}
+    <p>Balance: &#8377; {{balance}} lakhs.</p>
+{% endif %}
 {% if player_instances %}
 <table class="table table-bordered">
     <thead class="thead-dark">
         <th scope="col">Player ID</th>
         <th scope="col">Name</th>
         <th scope="col">Score</th>
+        {% if balance %} {% else %}
+        <th scope="col">Owner</th>
+        {% endif %}
         <th scope="col">Price</th>
-        <th scope="col">Team</th>
-        <th scope="col">Type</th>
-        <th scope="col">Status</th>
         <th scope="col">Base</th>
+        <th scope="col">Remove?</th>
     </thead>
     <tbody>
     {% for player_instance in player_instances %}
     <tr>
-        <td>{{player_instance.number}}</td>
+        <td>{{player_instance.id}}</td>
         <td>{{player_instance.player.name}}</td>
         <td>{{player_instance.player.score}}</td>
+        {% if balance %} {% else %}
+        <td>{{player_instance.member.name}}</td>
+        {% endif %}
         <td>{{player_instance.price}}</td>
-        <td>{{player_instance.player.team}}</td>
-        <td>{{player_instance.player.type}}</td>
-        <td>{{player_instance.status}}</td>
         <td>{{player_instance.player.base}}</td>
+        {% if player_instance.player.score >= 50 %}
+            <td>Cannot Remove</td>
+        {% elif player_instance.member is None %}
+            <td>Player Unsold</td>
+        {% else %}
+            <td><a class="button btn btn-danger" href="{% url 'remove_player' player_instance.id %}">Remove </a></td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>
