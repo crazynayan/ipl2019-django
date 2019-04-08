@@ -1,36 +1,70 @@
 Fantasy League Design
 ======================
 
-== REST API
-=== API for normal members
-. /members
-.. Shows the league status.
-... rank (Calculated)
-... member.name
-... member.balance
-... member.points
-... numeberOfPlayerPurchased  (Calculated)
-.. Order by highest points.
-. /members/{memberInitial}/players
-.. Shows the players owned by that member.
-... playerInstance.player.name
-... playerInstance.player.score
-... playerInstance.price
-... playerInstance.player.type
-... playerInstance.player.team
-... playerInstance.player.country
-.. Order by highest player score.
-.. In the list, an option is provide to release player (which are eligible for release)
-. /members/{memberInitial}/players/{playerInstanceNumber}
-.. This is a form to release a player. (PUT)
-... playerInstance.member = None
-... playerInstance.status = AVAILABLE
-... member.points -= playerInstance.score
-... member.balance += playerInstance.price
-... playerInstance.price = 0
-.. Shows the details of 1 player owned by player and ask confirmation of release.
+= URL
+. Test site
+.. autos.crazyideas.co.in/
+. Production site '(NOT YET READY)'
+.. ipl.crazyideas.co.in/
+
+<<<
+
+= REST API
+== API for IPL members
+=== Leaderboard
+. URL
+.. members/
+. Shows the leaderboard
+. Returns *member*.
+.. rank (Calculated)
+.. member.name
+.. member.balance
+.. member.points (Calculated)
+.. player_purchased (Calculated)
+. Order by highest points.
+
+=== My Players
+. URL
+.. my_players/
+. Shows the players owned by that member.
+. Returns *player_instance*.
+. An option is to release eligible players is provided.
+. Order by highest player score.
+
+<<<
+
+=== Remove Players
+. URL
+.. my_players/{player_instance_id}/remove/
+. This is a form to release a player.
+. Shows the details of 1 player owned by player and ask confirmation of release.
+. On Success, redirects to my_players/
+. Following validations are done.
+.. The *player_instance* should exists.
+... You cannot remove a player that does NOT exists.
+... This player does NOT exists.
+.. The *player* should be owned by somebody.
+... You can only release players that are owned.
+.. The *player* should be owned by the requesting *member*
+... You cannot remove this player since you do NOT own him.
+.. The *player* is eligible for release (< 50 points)
+... {player_instance.player.name} has already scored {player_instance.player.score} points.
+... You can only release players with less than 50 points.
+... Validate if the auctioneer has enabled removal of players. 'TO DO'
+. Following updates are done.
+.. Increase *member* balances.
+... player_instance.member.balance += player_instance.price
+.. Mark the *player* as available
+... player_instance.price = 0
+... player_instance.status = 'Available'
+... player_instance.member = None
+
+<<<
+
+= Ignore following Sections
+=== Bid Players
 . /members/{memberInitial}/bids
-.. This is a form to submit a bid. (POST)
+.. This is a form to submit a bid.
 .. Shows the details of 1 player for whom the bid is required.
 .. The bid should only be accepted once.
 .. If all players have submitted a bid then do further updates
@@ -38,7 +72,6 @@ Fantasy League Design
 ... playerInstance.price = Second Highest bid amount for that player
 ... playerInstance.status = PURCHASED
 ... member.balance -= playerInstance.price
-... member.points += playerInstance.score
 .. It will also show the list of members who still needs to submit the bid.
 . /bids
 .. Shows all bids for PURCHASED players
@@ -63,5 +96,7 @@ Fantasy League Design
 .. Will show all members and their status whether they have bid or not
 .. Will provide an option to submit bid on someone's behalf
 .. Redirect to /members/{memberInitial}/bids form
+
+
 
 

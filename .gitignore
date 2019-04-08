@@ -9,3 +9,4 @@ secret_key.txt
 dbpassword.txt
 test.adoc
 *.csv
+*.pdf

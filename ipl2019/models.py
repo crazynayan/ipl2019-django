@@ -7,14 +7,12 @@ from django.dispatch import receiver
 class Member(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.TextField(max_length=100, default='name')
-    points = models.DecimalField(max_digits=6, decimal_places=1, default=0)
     balance = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        ordering = ['-points']
         permissions = (
             ("auctioneer", "Auctioneer"),
             ("can_play_ipl2019", "Can play IPL 2019"),
@@ -51,8 +49,8 @@ class Player(models.Model):
 
 class PlayerInstance(models.Model):
     number = models.PositiveIntegerField(unique=True)
-    player = models.ForeignKey('Player', on_delete=models.CASCADE)
-    member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True)
+    player = models.ForeignKey('Player', on_delete=models.CASCADE, related_name='playerinstances')
+    member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True, related_name='playerinstances')
     STATUS = (
         ('Available', 'Available'),
         ('Purchased', 'Purchased'),

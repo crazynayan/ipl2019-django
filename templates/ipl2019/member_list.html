@@ -9,14 +9,16 @@
     <th scope="col">Name</th>
     <th scope="col">Points</th>
     <th scope="col">Balance</th>
+    <th scope="col">Players</th>
     </thead>
     <tbody>
     {% for member in member_list %}
     <tr>
         <td>{{forloop.counter}}</td>
         <td>{{member.name}}</td>
-        <td>{{member.points}}</td>
+        <td>{{member.pts}}</td>
         <td>{{member.balance}}</td>
+        <td>{{member.playerinstances.count}}</td>
     </tr>
     {% endfor %}
     </tbody>

@@ -1,20 +1,23 @@
 import csv
 
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import permission_required
+from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Member, Player, PlayerInstance
+from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
+from django.db.models import Sum
+from .models import Member, Player, PlayerInstance
+
 
 
 @permission_required('ipl2019.can_play_ipl2019')
 def member_view(request):
     template = "ipl2019/member_list.html"
+    member_list = Member.objects.annotate(pts=Sum('playerinstances__player__score')).order_by('-pts')
     context = {
-        'member_list': Member.objects.all(),
+        'member_list': member_list,
     }
     return render(request, template, context)
 
@@ -35,7 +38,7 @@ def my_player_view(request):
         me = Member.objects.get(user=request.user.id)
         context = {
             'player_instances': PlayerInstance.objects.filter(member=me).order_by('-player__score'),
-            'balance': me.balance,
+            'me': me,
         }
     # Only the superuser will not have any ownership. So for superuser display all players.
     except ObjectDoesNotExist:
@@ -109,10 +112,9 @@ def remove_player(request, pk):
         messages.error(request, 'You can only release players with less than 50 points.')
         return render(request, template, prompt)
 
-    # Validate
+    # Validate if the auctioneer has enabled removal of players.
 
     player_instance.member.balance += player_instance.price
-    player_instance.member.points -= player_instance.player.score
     player_instance.member.save()
 
     player_instance.price = 0
@@ -227,46 +229,14 @@ def update_scores(request):
             player = Player.objects.get(name=column[0])
             score = float(column[1])
             if player.score != score:
-                # Get the difference (delta) between the new score & old score
-                # to update the leaderboard in the Member class
-                delta = score - float(player.score)
-                # Update player score
                 player.score = score
                 player.save()
-                # Update Leaderboard
-                player_instances = PlayerInstance.objects.filter(player=player)
-                for player_instance in player_instances:
-                    if player_instance.member is not None:
-                        player_instance.member.points = float(player_instance.member.points) + delta
-                        player_instance.member.save()
         except ObjectDoesNotExist:
             pass
         except ValueError:
             pass
 
     return HttpResponseRedirect(reverse('member_list'))
-
-
-@permission_required('ipl2019.auctioneer')
-def check_points(request):
-    template = "ipl2019/points.html"
-    members_with_diff = []
-    for member in Member.objects.all():
-        calc_points = 0
-        player_instances = PlayerInstance.objects.filter(member=member)
-        for player_instance in player_instances:
-            calc_points += player_instance.player.score
-        if calc_points != member.points:
-            member_with_diff = {
-                'member': member.name,
-                'db_points': member.points,
-                'calc_points': calc_points,
-            }
-            members_with_diff.append(member_with_diff)
-    context = {
-        'members_with_diff': members_with_diff
-    }
-    return render(request, template, context)
 
 
 @permission_required('ipl2019.auctioneer')

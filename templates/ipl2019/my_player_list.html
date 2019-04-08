@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Players{% endblock %}
 {% block content %}
+{% if me %}
+<h1>{{me.name}} Players</h1>
+<h3>Balance: &#8377; {{me.balance}} lakhs.</h3>
+{% else %}
 <h1>IPL Players</h1>
-{% if balance %}
-    <p>Balance: &#8377; {{balance}} lakhs.</p>
 {% endif %}
 {% if player_instances %}
 <table class="table table-bordered">
@@ -11,7 +13,7 @@
         <th scope="col">Player ID</th>
         <th scope="col">Name</th>
         <th scope="col">Score</th>
-        {% if balance %} {% else %}
+        {% if me %} {% else %}
         <th scope="col">Owner</th>
         {% endif %}
         <th scope="col">Price</th>
@@ -24,7 +26,7 @@
         <td>{{player_instance.id}}</td>
         <td>{{player_instance.player.name}}</td>
         <td>{{player_instance.player.score}}</td>
-        {% if balance %} {% else %}
+        {% if me %} {% else %}
         <td>{{player_instance.member.name}}</td>
         {% endif %}
         <td>{{player_instance.price}}</td>
