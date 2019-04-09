@@ -11,9 +11,17 @@ Fantasy League Design
 
 = REST API
 == API for IPL members
+permission::
+    can_play_ipl2019
+
+[[member_list]]
+
 === Leaderboard
 . URL
-.. members/
+.. member_list/
+.. default page
+.. +View Leaderboard+ on Home page
+.. +Leaderboard+ on Nav bar
 . Shows the leaderboard
 . Returns *member*.
 .. rank (Calculated)
@@ -23,22 +31,40 @@ Fantasy League Design
 .. player_purchased (Calculated)
 . Order by highest points.
 
+[[my_players]]
+
 === My Players
 . URL
 .. my_players/
+.. +My Players+ on Nav bar
 . Shows the players owned by that member.
 . Returns *player_instance*.
 . An option is to release eligible players is provided.
 . Order by highest player score.
+. For superuser (player with no ownership), the entire list of players is returned.
+
+[[all_players]]
+
+=== All Players
+. URL
+.. all_players/
+.. There is no link provided for this since it is a resource intensive call.
+.. The 'auctioneer' function 'Upload Player Ownership' redirects here.
+. Shows the ownership of all players.
+. Returns *player_instance*.
+. An option is to release eligible players is provided.
+. Order by player.number
 
 <<<
+
+[[remove_players]]
 
 === Remove Players
 . URL
 .. my_players/{player_instance_id}/remove/
 . This is a form to release a player.
 . Shows the details of 1 player owned by player and ask confirmation of release.
-. On Success, redirects to my_players/
+. Redirects to <<my_players>>
 . Following validations are done.
 .. The *player_instance* should exists.
 ... You cannot remove a player that does NOT exists.
@@ -61,7 +87,45 @@ Fantasy League Design
 
 <<<
 
-= Ignore following Sections
+== API for Auctioneer
+permission::
+    auctioneer
+
+[[update_scores]]
+
+=== Update Scores
+. URL
+.. update_scores/
+.. +Update Scores+ on Nav Bar (only for 'auctioneer')
+. This is a form to update the scores of individual players.
+. This needs to be done after every match completes.
+. Redirects to <<member_list>>
+. Following validations are done.
+.. The extension of the file should be .csv
+... This file is not a .csv file.
+.. Order of columns in the csv should be player, score.
+... The csv header is not in the proper format.
+. Following updates are done.
+.. For each player the scores is overwritten.
+.. If the player does not exists then the row in csv file is ignored.
+.. If the score is NOT a decimal number then the row in csv file is ignored.
+
+=== Upload *members*
+. URL
+.. member_upload/
+.. Upload
+
+=== Upload *players*
+. URL
+.. player_upload/
+
+=== Upload player ownership
+. URL
+.. player_ownership_upload/
+
+
+== Ignore following Sections
+
 === Bid Players
 . /members/{memberInitial}/bids
 .. This is a form to submit a bid.
@@ -89,9 +153,6 @@ Fantasy League Design
 ... playerInstance.status = BID
 .. Will confirm whether a player's bid needs to be accepted
 .. Will throw an exception if the BID is already in progress
-. /league
-.. This will calculate the points of all members in member
-.. And show the same view as the /members
 . /auction/{playerInstanceNumber}/bids
 .. Will show all members and their status whether they have bid or not
 .. Will provide an option to submit bid on someone's behalf

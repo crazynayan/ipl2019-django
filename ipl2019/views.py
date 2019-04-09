@@ -129,7 +129,7 @@ def remove_player(request, pk):
 def member_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of member csv should be user, name, balance, points',
+        'order': 'Order of member csv should be user, name, balance.',
     }
 
     if request.method == "GET":
@@ -138,13 +138,13 @@ def member_upload(request):
     file = request.FILES['file']
 
     if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file")
+        messages.error(request, "This file is not a .csv file.")
         return render(request, template, prompt)
 
     with open(file.name) as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
-    if csv_data[0] != ['user', 'name', 'balance', 'points']:
+    if csv_data[0] != ['user', 'name', 'balance']:
         messages.error(request, "The csv header is not in the proper format.")
         return render(request, template, prompt)
 
@@ -154,7 +154,6 @@ def member_upload(request):
             member = Member.objects.get(user=user.id)
             member.name = column[1]
             member.balance = column[2]
-            member.points = column[3]
             member.save()
         except ObjectDoesNotExist:
             pass
@@ -166,7 +165,7 @@ def member_upload(request):
 def player_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of player csv should be name, cost, base, team, country, type, score',
+        'order': 'Order of player csv should be name, cost, base, team, country, type, score.',
     }
 
     if request.method == "GET":
@@ -175,7 +174,7 @@ def player_upload(request):
     file = request.FILES['file']
 
     if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file")
+        messages.error(request, "This file is not a .csv file.")
         return render(request, template, prompt)
 
     with open(file.name) as csv_file:
@@ -205,7 +204,7 @@ def player_upload(request):
 def update_scores(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of scores csv should be player, score',
+        'order': 'Order of scores csv should be player, score.',
     }
 
     if request.method == "GET":
@@ -214,14 +213,14 @@ def update_scores(request):
     file = request.FILES['file']
 
     if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file")
+        messages.error(request, 'This file is not a .csv file.')
         return render(request, template, prompt)
 
     with open(file.name) as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
     if csv_data[0] != ['player', 'score']:
-        messages.error(request, "The csv header is not in the proper format.")
+        messages.error(request, 'The csv header is not in the proper format.')
         return render(request, template, prompt)
 
     for column in csv_data[1:]:
@@ -243,7 +242,7 @@ def update_scores(request):
 def player_ownership_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of player ownership csv should be player, number, member, price',
+        'order': 'Order of player ownership csv should be player, number, member, price.',
     }
 
     if request.method == "GET":
@@ -252,7 +251,7 @@ def player_ownership_upload(request):
     file = request.FILES['file']
 
     if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file")
+        messages.error(request, "This file is not a .csv file.")
         return render(request, template, prompt)
 
     with open(file.name) as csv_file:
