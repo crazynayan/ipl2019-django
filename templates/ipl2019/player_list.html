@@ -32,7 +32,4 @@
 {% else %}
     <p>No Players present, please contact the auctioneer.</p>
 {% endif %}
-{% if perms.ipl2019.auctioneer %}
-    <h3><a href="{% url 'player_upload' %}">Upload Player CSV</a></h3>
-{% endif %}
 {% endblock %}

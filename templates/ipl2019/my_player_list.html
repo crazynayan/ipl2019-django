@@ -29,11 +29,7 @@
         {% if type == 'available' %}
         <th scope="col">Cost</th>
         <th scope="col">Team</th>
-        {% if perms.ipl2019.auctioneer %}
-        <th scope="col">Invite?</th>
-        {% else %}
         <th scope="col">Status</th>
-        {% endif %}
         {% else %}
         <th scope="col">Remove?</th>
         {% endif %}
@@ -55,7 +51,7 @@
         <td>{{player_instance.player.cost}}</td>
         <td>{{player_instance.player.team}}</td>
         <td>
-            {% if perms.ipl2019.auctioneer and player_instance.status == player_instance.AVAILABLE %}
+            {% if perms.ipl2019.auctioneer and player_instance.status == player_instance.AVAILABLE and player_removal == False %}
             <a class="button btn btn-primary" href="{% url 'invite_player' player_instance.id %}">Invite</a>
             {% else %}
             {{player_instance.status}}
@@ -80,8 +76,5 @@
 </table>
 {% else %}
     <p>You have not bought any players as yet.</p>
-{% endif %}
-{% if perms.ipl2019.auctioneer %}
-    <h3><a href="{% url 'player_ownership_upload' %}">Upload Player Ownership CSV</a></h3>
 {% endif %}
 {% endblock %}

@@ -76,7 +76,8 @@ def available_player(request):
             .filter(status__in=[PlayerInstance.AVAILABLE, PlayerInstance.UNSOLD, PlayerInstance.BIDDING])
             .order_by('-player__score', '-player__cost', 'player__name'),
         'me': me,
-        'type': 'available'
+        'type': 'available',
+        'player_removal': settings.IPL2019_PLAYER_REMOVAL,
     }
     return render(request, template, context)
 
@@ -295,6 +296,12 @@ def invite_player(request, pk):
         return render(request, template, prompt)
 
     if request.method == "GET":
+        return render(request, template, prompt)
+
+    # Validate if the auctioneer has disabled removal of players.
+    if settings.IPL2019_PLAYER_REMOVAL:
+        messages.error(request, 'Removal of players is enabled by auctioneer.')
+        messages.error(request, 'You cannot invite players for bids when the player removal is in progress.')
         return render(request, template, prompt)
 
     # Validate if the player is available.
@@ -517,3 +524,95 @@ def player_ownership_upload(request):
             pass
 
     return HttpResponseRedirect(reverse('all_player_list'))
+
+
+@permission_required('ipl2019.auctioneer')
+def reset(request):
+    template = "ipl2019/confirmation.html"
+    redirect = 'member_list'
+    confirmations = list()
+    confirmations.append('Are you sure you want to reset everything?')
+    confirmations.append('This will reset member balances, players, player ownership and remove all bids.')
+    confirmations.append('This uses member.csv, players.csv, player_ownership.csv.')
+    prompt = {
+        'confirmations': confirmations,
+        'redirect': redirect
+    }
+
+    if request.method == "GET":
+        return render(request, template, prompt)
+
+    with open('members.csv') as csv_file:
+        member_data = list(csv.reader(csv_file, delimiter=','))
+
+    if member_data[0] != ['user', 'name', 'balance']:
+        messages.error(request, 'The member.csv header is not in the proper format.')
+        messages.error(request, 'It needs to be in the order of user, name, balance')
+        return render(request, template, prompt)
+
+    with open('players.csv') as csv_file:
+        players_data = list(csv.reader(csv_file, delimiter=','))
+
+    if players_data[0] != ['name', 'cost', 'base', 'team', 'country', 'type']:
+        messages.error(request, 'The players.csv header is not in the proper format.')
+        messages.error(request, 'It needs to be in the order of name, cost, base, team, country, type')
+        return render(request, template, prompt)
+
+    with open('player_ownership.csv') as csv_file:
+        own_data = list(csv.reader(csv_file, delimiter=','))
+
+    if own_data[0] != ['player', 'number', 'member', 'price']:
+        messages.error(request, 'The player_ownership.csv header is not in the proper format.')
+        return render(request, template, prompt)
+
+    # Upload Member Data
+    for column in member_data[1:]:
+        try:
+            user = User.objects.get(username=column[0])
+            member = Member.objects.get(user=user.id)
+            member.name = column[1]
+            member.balance = column[2]
+            member.save()
+        except ObjectDoesNotExist:
+            pass
+
+    # Upload Player Data
+    for column in players_data[1:]:
+        _, created = Player.objects.update_or_create(
+            defaults={
+                'cost': column[1],
+                'base': column[2],
+                'team': column[3],
+                'country': column[4],
+                'type': column[5],
+            },
+            name=column[0]
+        )
+
+    # Upload Player Ownership Data
+    for column in own_data[1:]:
+        try:
+            player = Player.objects.get(name=column[0])
+            user = str(column[2]).lower()
+            if user == "base" or not User.objects.filter(username=user).exists():
+                member = None
+                status = PlayerInstance.AVAILABLE
+            else:
+                member = Member.objects.get(user=User.objects.get(username=user).id)
+                status = PlayerInstance.PURCHASED
+
+            _, created = PlayerInstance.objects.update_or_create(
+                defaults={
+                    'player': player,
+                    'price': column[3],
+                    'status': status,
+                    'member': member,
+                },
+                number=column[1]
+            )
+        except ObjectDoesNotExist:
+            pass
+
+    # Delete all bids TODO
+
+    return HttpResponseRedirect(reverse(redirect))
