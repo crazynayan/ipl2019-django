@@ -3,13 +3,14 @@ import csv
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
+from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from django.db.models import Sum
 from .models import Member, Player, PlayerInstance, Bid
-from .forms import BidForm
+from .forms import BidForm, PlayerRemovalForm
 
 
 @permission_required('ipl2019.can_play_ipl2019')
@@ -39,13 +40,15 @@ def my_player(request):
         context = {
             'player_instances': PlayerInstance.objects.filter(member=me).order_by('-player__score'),
             'me': me,
-            'type': 'my'
+            'type': 'my',
+            'player_removal': settings.IPL2019_PLAYER_REMOVAL,
         }
     # Only the superuser will not have any ownership. So for superuser display all players.
     except ObjectDoesNotExist:
         context = {
             'player_instances': PlayerInstance.objects.all().order_by('number'),
             'type': 'all',
+            'player_removal': settings.IPL2019_PLAYER_REMOVAL,
         }
     return render(request, template, context)
 
@@ -82,6 +85,9 @@ def available_player(request):
 def remove_player(request, pk):
     template = "ipl2019/confirmation.html"
     redirect = 'my_player_list'
+    prompt = {
+        'redirect': redirect,
+    }
     try:
         player_instance = PlayerInstance.objects.get(pk=pk)
         confirmations = list()
@@ -95,21 +101,19 @@ def remove_player(request, pk):
             confirmations.append(f'Owner : {player_instance.member.name}')
         else:
             confirmations.append(f'Owner : Unsold')
-        prompt = {
-            'confirmations': confirmations,
-            'player': player_instance,
-            'redirect': redirect,
-        }
+        prompt['confirmations'] = confirmations
+        prompt['player'] = player_instance
     except ObjectDoesNotExist:
         messages.error(request, "You cannot remove a player that does NOT exists.")
-        prompt = {
-            'confirmations': ['This player does NOT exists.'],
-            'player': None,
-            'redirect': redirect,
-        }
         return render(request, template, prompt)
 
     if request.method == "GET":
+        return render(request, template, prompt)
+
+    # Validate if the auctioneer has enabled removal of players.
+    if not settings.IPL2019_PLAYER_REMOVAL:
+        messages.error(request, 'Removal of players is disabled by auctioneer.')
+        messages.error(request, 'Please contact auctioneer to enable player removal')
         return render(request, template, prompt)
 
     # Validate if the player is owned by anybody
@@ -134,8 +138,6 @@ def remove_player(request, pk):
         messages.error(request, 'You can only release players with less than 50 points.')
         return render(request, template, prompt)
 
-    # Validate if the auctioneer has enabled removal of players.
-
     player_instance.member.balance += player_instance.price
     player_instance.member.save()
 
@@ -145,6 +147,27 @@ def remove_player(request, pk):
     player_instance.save()
 
     return HttpResponseRedirect(reverse(redirect))
+
+
+@permission_required('ipl2019.auctioneer')
+def player_removal(request):
+    template = "ipl2019/player_removal.html"
+    prompt = {
+        'removal': settings.IPL2019_PLAYER_REMOVAL
+    }
+    if request.method == "GET":
+        removal_form = PlayerRemovalForm(initial={'player_removal': settings.IPL2019_PLAYER_REMOVAL})
+        prompt['removal_form'] = removal_form
+        return render(request, template, prompt)
+
+    removal_form = PlayerRemovalForm(request.POST)
+    if not removal_form.is_valid():
+        prompt['removal_form'] = removal_form
+        return render(request, template, prompt)
+
+    settings.IPL2019_PLAYER_REMOVAL = removal_form.cleaned_data['player_removal']
+
+    return HttpResponseRedirect(reverse('my_player_list'))
 
 
 @permission_required('ipl2019.can_play_ipl2019')

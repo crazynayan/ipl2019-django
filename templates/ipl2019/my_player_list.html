@@ -67,6 +67,8 @@
             Cannot Remove
             {% elif player_instance.member is None %}
             Player Unsold
+            {% elif player_removal == False %}
+            Removal Disabled
             {% else %}
             <a class="button btn btn-danger" href="{% url 'remove_player' player_instance.id %}">Remove</a>
             {% endif %}

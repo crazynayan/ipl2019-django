@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Player Removal{% endblock %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+    <strong>{{ message|safe }}</strong>
+</div>
+{% endfor %}
+<hr/>
+{% endif %}
+<h3>
+    Player Removal is currently
+    <strong>
+        {% if removal %} Enabled. {% else %} Disabled. {% endif %}
+    </strong>
+</h3>
+<h6>Are you sure you want to change the settings for player removal?</h6>
+{% if removal_form %}
+<form method="post">
+    {% csrf_token %}
+    <div class="custom-control custom-switch">
+        <input type="checkbox"
+               class="custom-control-input"
+               id="{{removal_form.player_removal.id_for_label}}"
+               name="{{removal_form.player_removal.name}}"
+               {% if removal %} checked {% endif %}
+        >
+        <label class="custom-control-label" for="{{removal_form.player_removal.id_for_label}}">
+            Player Removal
+        </label>
+    </div>
+    <p></p>
+    <button class="btn btn-primary" type="submit">Submit</button>
+</form>
+{% endif %}
+{% endblock %}

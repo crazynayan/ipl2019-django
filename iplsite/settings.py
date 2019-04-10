@@ -166,3 +166,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = '/'
 STATIC_ROOT = 'static'
+
+# Custom Settings
+IPL2019_PLAYER_REMOVAL = False

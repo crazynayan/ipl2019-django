@@ -26,3 +26,10 @@ class BidForm(forms.Form):
                 raise ValidationError('You cannot bid more than your balance.')
         return amount
 
+
+class PlayerRemovalForm(forms.Form):
+    player_removal = forms.BooleanField(label='Enable Player Removal', required=False)
+
+    def clean_player_removal(self):
+        removal_switch = self.cleaned_data['player_removal']
+        return removal_switch
