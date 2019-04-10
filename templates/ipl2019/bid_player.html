@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Bid Player{% endblock %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<div {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+    <strong>{{ message|safe }}</strong>
+</div>
+{% endfor %}
+<hr/>
+{% endif %}
+{% if player_instance %}
+<h3>Bid for {{player_instance.player}}</h3>
+{% if member %}
+<p>Balance of {{member}} is <strong>&#8377 {{member.balance}} lakhs</strong></p>
+{% endif %}
+<p>{{player_instance.player}} has scored <strong>{{player_instance.player.score}} points</strong> so far.</p>
+<p>His base price is <strong>&#8377 {{player_instance.player.base}} lakhs</strong></p>
+<p>(He was purchased at &#8377 {{player_instance.player.cost}} lakhs by {{player_instance.player.team}} in the real auction.)</p>
+{% if bid_form %}
+<form method="post">
+    {% csrf_token %}
+    {{bid_form.as_table}}
+    <p></p>
+    <button class="btn btn-primary" name="submit_bid" type="submit">Submit</button>
+    <button class="btn btn-warning" name="pass_bid" type="submit">Pass</button>
+</form>
+{% endif %}
+<p></p>
+<hr/>
+<h3>Current Bid Status</h3>
+{% if pending_bidders %}
+<p>Players pending to bid</p>
+<ul>
+    {% for pending_bidder in pending_bidders %}
+    <li>{{pending_bidder}}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+<a class="btn btn-secondary" href="{% url 'available_player_list' %}" role="button">Cancel</a>
+
+{% endif %}
+{% endblock %}

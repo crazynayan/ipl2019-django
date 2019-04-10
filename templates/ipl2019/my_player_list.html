@@ -1,24 +1,42 @@
 {% extends "base.html" %}
 {% block title %}Players{% endblock %}
 {% block content %}
+
 {% if me %}
-<h1>{{me.name}} Players</h1>
-<h3>Balance: &#8377; {{me.balance}} lakhs.</h3>
+    {% if type == 'available' %}
+        <h1>Available Players</h1>
+    {% else %}
+        <h1>{{me.name}} Players</h1>
+    {% endif %}
+    <h3>Balance: &#8377; {{me.balance}} lakhs.</h3>
 {% else %}
-<h1>IPL Players</h1>
+    <h1>IPL Players</h1>
 {% endif %}
+
 {% if player_instances %}
 <table class="table table-bordered">
     <thead class="thead-dark">
         <th scope="col">Player ID</th>
         <th scope="col">Name</th>
         <th scope="col">Score</th>
-        {% if me %} {% else %}
+        {% if me == None and type != 'available' %}
         <th scope="col">Owner</th>
         {% endif %}
+        {% if type != 'available' %}
         <th scope="col">Price</th>
+        {% endif %}
         <th scope="col">Base</th>
+        {% if type == 'available' %}
+        <th scope="col">Cost</th>
+        <th scope="col">Team</th>
+        {% if perms.ipl2019.auctioneer %}
+        <th scope="col">Invite?</th>
+        {% else %}
+        <th scope="col">Status</th>
+        {% endif %}
+        {% else %}
         <th scope="col">Remove?</th>
+        {% endif %}
     </thead>
     <tbody>
     {% for player_instance in player_instances %}
@@ -26,17 +44,33 @@
         <td>{{player_instance.id}}</td>
         <td>{{player_instance.player.name}}</td>
         <td>{{player_instance.player.score}}</td>
-        {% if me %} {% else %}
+        {% if me == None and type != 'available' %}
         <td>{{player_instance.member.name}}</td>
         {% endif %}
+        {% if type != 'available' %}
         <td>{{player_instance.price}}</td>
+        {% endif %}
         <td>{{player_instance.player.base}}</td>
-        {% if player_instance.player.score >= 50 %}
-            <td>Cannot Remove</td>
-        {% elif player_instance.member is None %}
-            <td>Player Unsold</td>
+        {% if type == 'available' %}
+        <td>{{player_instance.player.cost}}</td>
+        <td>{{player_instance.player.team}}</td>
+        <td>
+            {% if perms.ipl2019.auctioneer and player_instance.status == player_instance.AVAILABLE %}
+            <a class="button btn btn-primary" href="{% url 'invite_player' player_instance.id %}">Invite</a>
+            {% else %}
+            {{player_instance.status}}
+            {% endif %}
+        </td>
         {% else %}
-            <td><a class="button btn btn-danger" href="{% url 'remove_player' player_instance.id %}">Remove </a></td>
+        <td>
+            {% if player_instance.player.score >= 50 %}
+            Cannot Remove
+            {% elif player_instance.member is None %}
+            Player Unsold
+            {% else %}
+            <a class="button btn btn-danger" href="{% url 'remove_player' player_instance.id %}">Remove</a>
+            {% endif %}
+        </td>
         {% endif %}
     </tr>
     {% endfor %}

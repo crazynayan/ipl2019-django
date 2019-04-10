@@ -51,10 +51,30 @@ class PlayerInstance(models.Model):
     number = models.PositiveIntegerField(unique=True)
     player = models.ForeignKey('Player', on_delete=models.CASCADE, related_name='playerinstances')
     member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True, related_name='playerinstances')
+    AVAILABLE = 'Available'
+    PURCHASED = 'Purchased'
+    BIDDING = 'Bidding'
+    UNSOLD = 'Unsold'
     STATUS = (
-        ('Available', 'Available'),
-        ('Purchased', 'Purchased'),
-        ('Bidding', 'Bidding'),
+        (AVAILABLE, 'Available'),
+        (PURCHASED, 'Purchased'),
+        (BIDDING, 'Bidding'),
+        (UNSOLD, 'Unsold'),
     )
     status = models.CharField(max_length=10, choices=STATUS, default='Available')
     price = models.PositiveIntegerField(blank=True, default=0)
+
+    def __str__(self):
+        return f'{self.player} ({self.number})'
+
+
+class Bid(models.Model):
+    NO_BALANCE = -2
+    PASS = -1
+    OWNED = -3
+    amount = models.IntegerField(blank=True, default=0)
+    player_instance = models.ForeignKey('PlayerInstance', on_delete=models.CASCADE, related_name='bids')
+    member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True, related_name='bids')
+
+    def __str__(self):
+        return f'{self.player_instance} - {self.member} - {self.amount}'

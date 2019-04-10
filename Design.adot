@@ -1,10 +1,9 @@
-Fantasy League Design
-======================
+= Fantasy League Design
 
-= URL
+== URL
 . Test site
 .. autos.crazyideas.co.in/
-. Production site '(NOT YET READY)'
+. Production site (NOT YET READY)
 .. ipl.crazyideas.co.in/
 
 <<<
@@ -38,7 +37,7 @@ permission::
 .. my_players/
 .. +My Players+ on Nav bar
 . Shows the players owned by that member.
-. Returns *player_instance*.
+. Returns *playerinstance*.
 . An option is to release eligible players is provided.
 . Order by highest player score.
 . For superuser (player with no ownership), the entire list of players is returned.
@@ -51,9 +50,36 @@ permission::
 .. There is no link provided for this since it is a resource intensive call.
 .. The 'auctioneer' function 'Upload Player Ownership' redirects here.
 . Shows the ownership of all players.
-. Returns *player_instance*.
+. Returns *playerinstance*.
 . An option is to release eligible players is provided.
 . Order by player.number
+
+[[available_players]]
+
+=== Shop
+. URL
+.. available_players/
+.. +Shop+ on Nav bar
+. Shows all available players
+. Returns *playerinstance*
+. An option to invite bid is provided '(Only for auctioneer)'
+.. Will be disabled for available players who have already been invited to bid.
+. Order by score, cost, base and then name.
+
+[[invite_bids]]
+
+=== Invite Bids
+. URL
+.. available_players/{playerinstance.id}/invite_bids
+. This is a form to invite bids for a player
+. Shows the details of 1 player and ask confirmation to invite bids.
+. Redirects to <<available_players>>
+. Following validations are done.
+.. Player status should be 'Available'
+.. Player has NOT been invited for bid before
+. Following updates are done.
+.. player_instance.status = 'Bidding'
+.. Check all members with balance < base and auto-populate their bid by NO_BALANCE
 
 <<<
 

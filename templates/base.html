@@ -28,6 +28,12 @@
             <li class = "nav-item active">
                 <a class="nav-link" href="{% url 'my_player_list' %}">My Players</a>
             </li>
+            <li class = "nav-item active">
+                <a class="nav-link" href="{% url 'available_player_list' %}">Shop</a>
+            </li>
+            <li class = "nav-item active">
+                <a class="nav-link" href="{% url 'bid_player' %}">Bid</a>
+            </li>
             {% if perms.ipl2019.auctioneer %}
             <li class = "nav-item active">
                 <a class = "nav-link" href="{% url 'update_scores' %}">Update Scores</a>
