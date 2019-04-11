@@ -164,11 +164,12 @@ def remove_player(request, pk):
         player_instance = PlayerInstance.objects.get(pk=pk)
         confirmations = list()
         confirmations.append('Are you sure you want to remove this player?')
-        confirmations.append(f'Name : {player_instance.player.name}')
-        confirmations.append(f'Score : {player_instance.player.score} points')
-        confirmations.append(f'Price : \u20B9 {player_instance.price} lakhs')
-        confirmations.append(f'Team : {player_instance.player.team}')
-        confirmations.append(f'Type : {player_instance.player.type}')
+        confirmations.append(f'{player_instance.player.name} has scored {player_instance.player.score} points.')
+        confirmations.append(f'You had purchased him for \u20B9 {player_instance.price} lakhs. ')
+        confirmations.append(f'But if you sell him now his base price would be \u20B9 {player_instance.player.base} lakhs.')
+        confirmations.append(f'He is a {player_instance.player.type} from {player_instance.player.team}.')
+        confirmations.append(f'He was purchased by {player_instance.player.team} ' +
+                             f'at \u20B9 {player_instance.player.cost} lakhs in the real auction.')
         if player_instance.member is not None:
             confirmations.append(f'Owner : {player_instance.member.name}')
         else:
