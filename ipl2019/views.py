@@ -1,4 +1,5 @@
 import csv
+import random
 
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
@@ -78,6 +79,76 @@ def available_player(request):
         'me': me,
         'type': 'available',
         'player_removal': settings.IPL2019_PLAYER_REMOVAL,
+    }
+    return render(request, template, context)
+
+
+@permission_required('ipl2019.can_play_ipl2019')
+def bid_list(request):
+    template = "ipl2019/bid_list.html"
+    members_sorted = Member.objects.all().order_by('user__username')
+    header = [member.user.username.upper() for member in members_sorted]
+    try:
+        bidding_player = PlayerInstance.objects.get(status=PlayerInstance.BIDDING)
+        bids = Bid.objects.exclude(player_instance=bidding_player)
+    except ObjectDoesNotExist:
+        bids = Bid.objects.all()
+
+    # bid_pivot has the following structure
+    # bid_pivot = [
+    #     {
+    #         'player': 'Virat Kohli (1)',
+    #         'members': [
+    #             {
+    #                 'username': 'AG',
+    #                 'amount': 1000,
+    #             },
+    #             {
+    #                 'username': 'VP',
+    #                 'amount': 1200,
+    #             },
+    #         ],
+    #     },
+    #     {
+    #         'player': 'Virat Kohli (2)',
+    #         'members': [
+    #             {
+    #                 'username': 'AG',
+    #                 'amount': 1100,
+    #             },
+    #             {
+    #                 'username': 'NZ',
+    #                 'amount': 1050,
+    #             },
+    #         ],
+    #     },
+    # ]
+    bid_pivot = list()
+    for bid in bids:
+        member_bid = {
+            'username': bid.member.user.username.upper(),
+            'amount': max(0, bid.amount),
+            'winner': False,
+        }
+        if bid.player_instance.member == bid.member:
+            member_bid['winner'] = True
+        try:
+            player_bid = [bid_dict for bid_dict in bid_pivot if bid_dict['player'] == bid.player_instance][0]
+            player_bid['members'].append(member_bid)
+        except IndexError:
+            player_bid = {
+                'player': bid.player_instance,
+                'members': list(),
+            }
+            player_bid['members'].append(member_bid)
+            bid_pivot.append(player_bid)
+
+    for player_bid in bid_pivot:
+        player_bid['members'].sort(key=lambda member: member['username'])
+
+    context = {
+        'header': header,
+        'player_bids': bid_pivot,
     }
     return render(request, template, context)
 
@@ -250,8 +321,12 @@ def bid_player(request):
             player_instance.status = PlayerInstance.UNSOLD
             player_instance.save()
         else:
-            # Code for ties of highest bid amount later. # TODO
-            winner = Member.objects.get(pk=winning_bids[0].member.pk)
+            # If there is a tie (winner_count > 1) decide the winner randomly between all winners.
+            # If there is no tie (winner_count = 1) then the winner_index will always be 0.
+            winner_count = winning_bids.filter(amount=winning_bids[0].amount).count()
+            winner_index = random.randrange(0, winner_count)
+            winner = Member.objects.get(pk=winning_bids[winner_index].member.pk)
+
             player_instance.member = winner
             player_instance.price = max(winning_bids[1].amount, player_instance.player.base)
             player_instance.status = PlayerInstance.PURCHASED
@@ -534,6 +609,7 @@ def reset(request):
     confirmations.append('Are you sure you want to reset everything?')
     confirmations.append('This will reset member balances, players, player ownership and remove all bids.')
     confirmations.append('This uses member.csv, players.csv, player_ownership.csv.')
+    confirmations.append('The reset will run for a few minutes. Don\'t close the page.')
     prompt = {
         'confirmations': confirmations,
         'redirect': redirect
@@ -613,6 +689,7 @@ def reset(request):
         except ObjectDoesNotExist:
             pass
 
-    # Delete all bids TODO
+    # Delete all bids
+    Bid.objects.all().delete()
 
     return HttpResponseRedirect(reverse(redirect))

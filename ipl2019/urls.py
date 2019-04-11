@@ -16,6 +16,7 @@ urlpatterns = [
     path('available_players/<int:pk>/invite/', views.invite_player, name='invite_player'),
 
     path('bid_player/', views.bid_player, name='bid_player'),
+    path('bid_list/', views.bid_list, name='bid_list'),
 
     path('player_ownership_upload/', views.player_ownership_upload, name='player_ownership_upload'),
     path('update_scores/', views.update_scores, name='update_scores'),

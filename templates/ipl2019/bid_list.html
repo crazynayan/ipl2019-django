@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}IPL Rankings{% endblock %}
+{% block content %}
+<h1>Fantasy IPL Rankings</h1>
+{% if player_bids %}
+<table class="table table-bordered table-sm">
+    <thead class="thead-dark">
+    <th scope="col">No.</th>
+    <th scope="col">Player</th>
+    {% for username in header %}
+    <th scope="col">{{username}}</th>
+    {% endfor %}
+    </thead>
+    <tbody>
+    {% for player_bid in player_bids %}
+    <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <th scope="row">{{player_bid.player}}</th>
+        {% for member in player_bid.members %}
+        <td {% if member.winner %}class="table-success"{% endif %}>
+            {% if member.winner %}<strong>{% endif %}
+            {{member.amount}}
+            {% if member.winner %}</strong>{% endif %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>There are no completed bids as of now.</p>
+{% endif %}
+{% endblock %}
