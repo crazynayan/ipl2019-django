@@ -32,9 +32,10 @@ def save_user_member(sender, instance, **kwargs):
 
 
 class Player(models.Model):
+    RATIO = 5.91
     name = models.TextField(max_length=100)
     cost = models.PositiveIntegerField(default=0)
-    base = models.PositiveIntegerField(default=0)
+    iplbase = models.PositiveIntegerField(default=0)
     team = models.CharField(max_length=4, blank=True)
     country = models.TextField(max_length=100)
     type = models.CharField(max_length=12, blank=True)
@@ -45,6 +46,10 @@ class Player(models.Model):
 
     class Meta:
         ordering = ['-score']
+
+    @property
+    def base(self):
+        return max(self.iplbase, round(float(self.score) * self.RATIO))
 
 
 class PlayerInstance(models.Model):
