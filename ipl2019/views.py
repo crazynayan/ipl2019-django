@@ -87,7 +87,8 @@ def available_player(request):
 def bid_list(request):
     template = "ipl2019/bid_list.html"
     members_sorted = Member.objects.all().order_by('user__username')
-    header = [member.user.username.upper() for member in members_sorted]
+    # header = [member.user.username.upper() for member in members_sorted]
+    header = members_sorted
     try:
         bidding_player = PlayerInstance.objects.get(status=PlayerInstance.BIDDING)
         bids = Bid.objects.exclude(player_instance=bidding_player)
@@ -444,13 +445,17 @@ def is_bidding_complete(player_instance):
 def member_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of member csv should be user, name, balance.',
+        'order': 'Order of member csv should be user, name, balance, color, bgcolor.',
     }
 
     if request.method == "GET":
         return render(request, template, prompt)
 
-    file = request.FILES['file']
+    file = request.FILES.get('file', None)
+
+    if file is None:
+        messages.error(request, "Please select a file to upload.")
+        return render(request, template, prompt)
 
     if not file.name.endswith('.csv'):
         messages.error(request, "This file is not a .csv file.")
@@ -459,7 +464,7 @@ def member_upload(request):
     with open(file.name) as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
-    if csv_data[0] != ['user', 'name', 'balance']:
+    if csv_data[0] != ['user', 'name', 'balance', 'color', 'bgcolor']:
         messages.error(request, "The csv header is not in the proper format.")
         return render(request, template, prompt)
 
@@ -469,6 +474,8 @@ def member_upload(request):
             member = Member.objects.get(user=user.id)
             member.name = column[1]
             member.balance = column[2]
+            member.color = column[3]
+            member.bgcolor = column[4]
             member.save()
         except ObjectDoesNotExist:
             pass
@@ -525,7 +532,11 @@ def update_scores(request):
     if request.method == "GET":
         return render(request, template, prompt)
 
-    file = request.FILES['file']
+    file = request.FILES.get('file', None)
+
+    if file is None:
+        messages.error(request, "Please select a file to upload.")
+        return render(request, template, prompt)
 
     if not file.name.endswith('.csv'):
         messages.error(request, 'This file is not a .csv file.')
@@ -608,7 +619,7 @@ def reset(request):
     redirect = 'member_list'
     confirmations = list()
     confirmations.append('Are you sure you want to reset everything?')
-    confirmations.append('This will reset member balances, players, player ownership and remove all bids.')
+    confirmations.append('This will reset member balances, players, player ownership, remove all bids and disable player removal.')
     confirmations.append('This uses member.csv, players.csv, player_ownership.csv.')
     confirmations.append('The reset will run for a few minutes. Don\'t close the page.')
     prompt = {
@@ -622,9 +633,9 @@ def reset(request):
     with open('members.csv') as csv_file:
         member_data = list(csv.reader(csv_file, delimiter=','))
 
-    if member_data[0] != ['user', 'name', 'balance']:
+    if member_data[0] != ['user', 'name', 'balance', 'color', 'bgcolor']:
         messages.error(request, 'The member.csv header is not in the proper format.')
-        messages.error(request, 'It needs to be in the order of user, name, balance')
+        messages.error(request, 'It needs to be in the order of user, name, balance, color, bgcolor')
         return render(request, template, prompt)
 
     with open('players.csv') as csv_file:
@@ -649,6 +660,8 @@ def reset(request):
             member = Member.objects.get(user=user.id)
             member.name = column[1]
             member.balance = column[2]
+            member.color = column[3]
+            member.bgcolor = column[4]
             member.save()
         except ObjectDoesNotExist:
             pass
@@ -658,7 +671,7 @@ def reset(request):
         _, created = Player.objects.update_or_create(
             defaults={
                 'cost': column[1],
-                'base': column[2],
+                'iplbase': column[2],
                 'team': column[3],
                 'country': column[4],
                 'type': column[5],
@@ -692,5 +705,8 @@ def reset(request):
 
     # Delete all bids
     Bid.objects.all().delete()
+
+    # Disable Player Removal
+    settings.PLAYER_REMOVAL = False
 
     return HttpResponseRedirect(reverse(redirect))

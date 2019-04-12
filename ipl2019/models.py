@@ -8,6 +8,8 @@ class Member(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.TextField(max_length=100, default='name')
     balance = models.PositiveIntegerField(default=0)
+    color = models.TextField(max_length=20, default='black')
+    bgcolor = models.TextField(max_length=20, default='white')
 
     def __str__(self):
         return self.name

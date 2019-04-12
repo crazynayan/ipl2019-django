@@ -19,9 +19,20 @@
 <body>
 
 <nav class="navbar navbar-expand-sm static-top navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'main' %}">
+    <a class="navbar-brand" href="{% url 'main' %}" >
         {% if user.is_authenticated %}
-        {{user.username.upper}}
+        <div style="background-color:{{user.member.bgcolor}};
+                        color:{{user.member.color}};
+                        font-weight:bold;
+                        border-radius: 50%;
+                        height: 30px;
+                        width: 33px;
+                        font-size: 17px;
+                        text-align: center;
+                        display: table;
+                    ">
+            <div style="display: table-cell; vertical-align:middle">{{user.username.upper}}</div>
+        </div>
         {% else %}
         Home
         {% endif %}

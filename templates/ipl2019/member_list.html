@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Fantasy IPL Rankings</h1>
 {% if member_list %}
-<table class="table table-bordered table-striped">
+<table class="table table-bordered">
     <thead class="thead-dark">
     <th scope="col">Rank</th>
     <th scope="col">Name</th>
@@ -13,9 +13,9 @@
     </thead>
     <tbody>
     {% for member in member_list %}
-    <tr>
+    <tr style="font-weight:bold;">
         <td>{{forloop.counter}}</td>
-        <td>{{member.name}}</td>
+        <td style="background-color:{{member.bgcolor}}; color:{{member.color}};">{{member.name}}</td>
         <td>{{member.pts}}</td>
         <td>{{member.balance}}</td>
         <td>{{member.playerinstances.count}}</td>
