@@ -25,7 +25,7 @@ with open('secret_key.txt') as f:
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [ '*' ]
 
@@ -102,10 +102,12 @@ if os.getenv('GAE_APPLICATION', None):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'HOST': '/cloudsql/firstdjango-236308:asia-south1:first-django-dbs',
+            # 'HOST': '/cloudsql/firstdjango-236308:asia-south1:first-django-dbs',
+            'HOST': '/cloudsql/super-ipl-league-2019:asia-south1:ipl',
             'USER': 'nayan',
             'PASSWORD': dbpassword,
-            'NAME': 'autos',
+            # 'NAME': 'autos',
+            'NAME': 'ipl',
         }
     }
 else:
@@ -120,7 +122,8 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'HOST': '127.0.0.1',
             'PORT': '3306',
-            'NAME': 'autos',
+            # 'NAME': 'autos',
+            'NAME': 'ipl',
             'USER': 'nayan',
             'PASSWORD': dbpassword,
         }
@@ -169,3 +172,15 @@ STATIC_ROOT = 'static'
 
 # Custom Settings
 IPL2019_PLAYER_REMOVAL = False
+
+# Production Deployment
+DEBUG = False
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
