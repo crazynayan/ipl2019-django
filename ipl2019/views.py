@@ -619,8 +619,8 @@ def reset(request):
     redirect = 'member_list'
     confirmations = list()
     confirmations.append('Are you sure you want to reset everything?')
-    confirmations.append('This will reset member balances, players, player ownership, remove all bids and disable player removal.')
-    confirmations.append('This uses member.csv, players.csv, player_ownership.csv.')
+    confirmations.append('This will reset players, player ownership, remove all bids and disable player removal.')
+    confirmations.append('This uses players.csv, player_ownership.csv.')
     confirmations.append('The reset will run for a few minutes. Don\'t close the page.')
     prompt = {
         'confirmations': confirmations,
@@ -630,13 +630,13 @@ def reset(request):
     if request.method == "GET":
         return render(request, template, prompt)
 
-    with open('members.csv') as csv_file:
-        member_data = list(csv.reader(csv_file, delimiter=','))
-
-    if member_data[0] != ['user', 'name', 'balance', 'color', 'bgcolor']:
-        messages.error(request, 'The member.csv header is not in the proper format.')
-        messages.error(request, 'It needs to be in the order of user, name, balance, color, bgcolor')
-        return render(request, template, prompt)
+    # with open('members.csv') as csv_file:
+    #     member_data = list(csv.reader(csv_file, delimiter=','))
+    #
+    # if member_data[0] != ['user', 'name', 'balance', 'color', 'bgcolor']:
+    #     messages.error(request, 'The member.csv header is not in the proper format.')
+    #     messages.error(request, 'It needs to be in the order of user, name, balance, color, bgcolor')
+    #     return render(request, template, prompt)
 
     with open('players.csv') as csv_file:
         players_data = list(csv.reader(csv_file, delimiter=','))
@@ -654,17 +654,17 @@ def reset(request):
         return render(request, template, prompt)
 
     # Upload Member Data
-    for column in member_data[1:]:
-        try:
-            user = User.objects.get(username=column[0])
-            member = Member.objects.get(user=user.id)
-            member.name = column[1]
-            member.balance = column[2]
-            member.color = column[3]
-            member.bgcolor = column[4]
-            member.save()
-        except ObjectDoesNotExist:
-            pass
+    # for column in member_data[1:]:
+    #     try:
+    #         user = User.objects.get(username=column[0])
+    #         member = Member.objects.get(user=user.id)
+    #         member.name = column[1]
+    #         member.balance = column[2]
+    #         member.color = column[3]
+    #         member.bgcolor = column[4]
+    #         member.save()
+    #     except ObjectDoesNotExist:
+    #         pass
 
     # Upload Player Data
     for column in players_data[1:]:

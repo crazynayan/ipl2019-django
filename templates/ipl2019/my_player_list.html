@@ -26,9 +26,9 @@
         <th scope="col">Price</th>
         {% endif %}
         <th scope="col">New Base</th>
+        <th scope="col">Team</th>
         {% if type == 'available' %}
         <th scope="col">Cost</th>
-        <th scope="col">Team</th>
         <th scope="col">Status</th>
         {% else %}
         <th scope="col">Remove?</th>
@@ -47,9 +47,9 @@
         <td>{{player_instance.price}}</td>
         {% endif %}
         <td>{{player_instance.player.base}}</td>
+        <td>{{player_instance.player.team}}</td>
         {% if type == 'available' %}
         <td>{{player_instance.player.cost}}</td>
-        <td>{{player_instance.player.team}}</td>
         <td>
             {% if perms.ipl2019.auctioneer and player_instance.status == player_instance.AVAILABLE and player_removal == False %}
             <a class="button btn btn-primary" href="{% url 'invite_player' player_instance.id %}">Invite</a>
