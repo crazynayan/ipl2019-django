@@ -38,7 +38,7 @@ class Player(models.Model):
     name = models.TextField(max_length=100)
     cost = models.PositiveIntegerField(default=0)
     iplbase = models.PositiveIntegerField(default=0)
-    team = models.CharField(max_length=4, blank=True)
+    team = models.ForeignKey('Team', on_delete=models.SET_NULL, null=True, related_name='players')
     country = models.TextField(max_length=100)
     type = models.CharField(max_length=12, blank=True)
     score = models.DecimalField(max_digits=6, decimal_places=1, default=0)
@@ -85,3 +85,28 @@ class Bid(models.Model):
 
     def __str__(self):
         return f'{self.player_instance} - {self.member} - {self.amount}'
+
+
+class Team(models.Model):
+    name = models.CharField(max_length=4, null=True)
+    full_name = models.CharField(max_length=30, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Match(models.Model):
+    name = models.CharField(max_length=10, null=True)
+    date = models.DateField()
+    teams = models.ManyToManyField('Team', through='TeamMatch', related_name='matches')
+
+    def __str__(self):
+        return self.name
+
+
+class TeamMatch(models.Model):
+    team = models.ForeignKey('Team', on_delete=models.CASCADE, related_name='team_matches')
+    match = models.ForeignKey('Match', on_delete=models.CASCADE, related_name='team_matches')
+
+    def __str__(self):
+        return f'{self.team} in {self.match} match.'

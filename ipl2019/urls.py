@@ -12,6 +12,9 @@ urlpatterns = [
     path('my_players/<int:pk>/remove/', views.remove_player, name='remove_player'),
     path('all_players/', views.all_player, name='all_player_list'),
 
+    path('match_list/', views.match_list, name='match_list'),
+    path('match_list/<int:pk>/players/', views.match_player, name='match_player'),
+
     path('available_players/', views.available_player, name='available_player_list'),
     path('available_players/<int:pk>/invite/', views.invite_player, name='invite_player'),
 

@@ -10,12 +10,9 @@
 <hr/>
 {% endif %}
 <h1>Upload CSV</h1>
-    {{order}}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label>Upload File </label>
-        <input class="btn btn-primary" type="file" name="file">
-        <p>Only Accepts CSV Files</p>
-        <button class="btn btn-primary" type="submit">Upload</button>
-    </form>
+<h4>{{order}}</h4>
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Upload</button>
+</form>
 {% endblock %}

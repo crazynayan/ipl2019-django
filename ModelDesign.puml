@@ -1,39 +1,56 @@
 @startuml
 !define primary_key(x) <b><u>x</u></b>
 !define foreign_key(x) <color:blue>x</color>
-class Member {
+class Team {
     name
-    points
-    balance
 }
+
+class Match {
+    name
+    foreign_key(matches)
+    date
+}
+
+class TeamMatch {
+    foreign_key(team)
+    foreign_key(match)
+}
+
 class Player {
     name
     cost
-    base
-    team
+    iplbase
+    foreign_key(team)
     country
     type
     score
 }
 
+class Member {
+    name
+    points
+    balance
+    color
+    bgcolor
+}
+
+
 class PlayerInstance {
-    primary_key(number)
+    number
     foreign_key(player)
     foreign_key(member)
     status
     price
 }
 note right
-    status can be Available, Purchased or Bidding
-    Only one playerInstance can have a Bidding status
+    status can be AVAILABLE, PURCHASED, UNSOLD or BIDDING
+    Only one playerInstance can have a BIDDING status
 end note
 
 
 class Bid {
-    primary_key(id)
     foreign_key(member)
     foreign_key(playerInstance)
-    bidDate
     amount
 }
 
@@ -41,4 +58,8 @@ Player "1" ---> "2" PlayerInstance::player : can have
 Member "1" ---> "Many" PlayerInstance::member : can own
 Member "1" ---> "Many" Bid::member: can make
 PlayerInstance "1" ---> "Many" Bid::playerInstance : can have
+Team "1" ---> "Many" Player::team : can have
+Match "1" ---> "2" TeamMatch::match : consists of
+Team "1" ---> "Many" TeamMatch::team : can play
+
 @enduml

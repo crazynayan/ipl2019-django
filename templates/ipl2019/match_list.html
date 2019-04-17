@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Matches{% endblock %}
+{% block content %}
+<h1>Current Matches</h1>
+
+<h4>Today's Matches</h4>
+{% if today_matches %}
+    {% for match in today_matches %}
+        <h5>
+            <a class="button btn btn-primary" href="{% url 'match_player' match.id %}">View {{match}}</a>
+        </h5>
+    {% endfor %}
+{% else %}
+<p>No matches are scheduled for today.</p>
+{% endif %}
+
+<h4>Tomorrow's Matches</h4>
+{% if tomorrow_matches %}
+    {% for match in tomorrow_matches %}
+        <h5>
+            <a class="button btn btn-primary" href="{% url 'match_player' match.id %}">View {{match}}</a>
+        </h5>
+    {% endfor %}
+{% else %}
+<p>No matches are scheduled for tomorrow.</p>
+{% endif %}
+
+<h4>Yesterday's Matches</h4>
+{% if yesterday_matches %}
+    {% for match in yesterday_matches %}
+        <h5>
+            <a class="button btn btn-primary" href="{% url 'match_player' match.id %}">View {{match}}</a>
+        </h5>
+    {% endfor %}
+{% else %}
+<p>No matches played yesterday.</p>
+{% endif %}
+{% endblock %}

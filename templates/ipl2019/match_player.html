@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Players{% endblock %}
+{% block content %}
+{% if match %}
+<h1>Players in {{match}}</h1>
+{% regroup players by member as member_list %}
+<table class="table table-bordered table-sm table-hover">
+    <thead class="thead-dark">
+    <th scope="col">Name</th>
+    <th scope="col">Player</th>
+    <th scope="col">Score</th>
+    <th scope="col">Price</th>
+    </thead>
+    <tbody>
+    {% for member in member_list %}
+    {% for player in member.list %}
+    <tr>
+        {% ifchanged %}
+        <td rowspan="{{ member.list|length }}"
+            style="background-color:{{player.member.bgcolor}};
+                color:{{player.member.color}};
+                vertical-align:middle;
+                font-weight:bold">
+            {{member.grouper}} <br/> ({{player.points}} points)
+        </td>
+        {% endifchanged %}
+        <td>{{player.player}}</td>
+        <td>{{player.player.score}}</td>
+        <td>{{player.price}}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No match selected.</p>
+{% endif %}
+{% endblock %}

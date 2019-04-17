@@ -50,13 +50,7 @@
                 <a class="nav-link" href="{% url 'my_player_list' %}">Players</a>
             </li>
             <li class = "nav-item active">
-                <a class="nav-link" href="{% url 'available_player_list' %}">Shop</a>
-            </li>
-            <li class = "nav-item active">
-                <a class="nav-link" href="{% url 'bid_player' %}">Bid</a>
-            </li>
-            <li class = "nav-item active">
-                <a class="nav-link" href="{% url 'bid_list' %}">Bids</a>
+                <a class="nav-link" href="{% url 'match_list' %}">Match</a>
             </li>
             {% if perms.ipl2019.auctioneer %}
             <li class = "nav-item active">

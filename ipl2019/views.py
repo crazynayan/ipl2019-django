@@ -1,5 +1,6 @@
 import csv
 import random
+import datetime
 
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
@@ -10,7 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from django.db.models import Sum
-from .models import Member, Player, PlayerInstance, Bid
+from .models import Member, Player, PlayerInstance, Bid, Team, Match, TeamMatch
 from .forms import BidForm, PlayerRemovalForm
 
 
@@ -58,8 +59,42 @@ def my_player(request):
 def all_player(request):
     template = "ipl2019/my_player_list.html"
     context = {
-        'player_instances': PlayerInstance.objects.all().order_by('number'),
+        'player_instances': PlayerInstance.objects.all().exclude(member=None).order_by('member', '-player__score'),
         'type': 'all',
+        'player_removal': settings.IPL2019_PLAYER_REMOVAL,
+    }
+    return render(request, template, context)
+
+
+@permission_required('ipl2019.can_play_ipl2019')
+def match_list(request):
+    template = "ipl2019/match_list.html"
+    context = {
+        'today_matches': Match.objects.filter(date=datetime.date.today()),
+        'tomorrow_matches': Match.objects.filter(date=datetime.date.today() + datetime.timedelta(days=1)),
+        'yesterday_matches': Match.objects.filter(date=datetime.date.today() - datetime.timedelta(days=1)),
+    }
+    return render(request, template, context)
+
+
+@permission_required('ipl2019.can_play_ipl2019')
+def match_player(request, pk):
+    template = "ipl2019/match_player.html"
+    try:
+        match = Match.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return render(request, template, {})
+
+    teams = Team.objects.filter(matches=match)
+    players = PlayerInstance.objects\
+        .filter(player__team__in=teams)\
+        .exclude(member=None)\
+        .annotate(points=Sum('member__playerinstances__player__score'))\
+        .order_by('-points', '-player__score')
+
+    context = {
+        'players': players,
+        'match': match,
     }
     return render(request, template, context)
 
@@ -387,19 +422,6 @@ def invite_player(request, pk):
         messages.error(request, 'You can only invite available players.')
         return render(request, template, prompt)
 
-    # ## Commented out the following scenarios because the AVAILABLE check takes care of it.
-    # # Validate if the player is not owned by anybody
-    # if player_instance.member is not None:
-    #     messages.error(request, f'{player_instance} is owned by somebody.')
-    #     messages.error(request, 'You can only release players that are not owned.')
-    #     return render(request, template, prompt)
-    #
-    # # Validate if there are no bids for this player
-    # if Bid.objects.filter(player_instance=player_instance).exists():
-    #     messages.error(request, f'{player_instance} has already been invited for bids.')
-    #     messages.error(request, 'You can only invites players one time.')
-    #     return render(request, template, prompt)
-
     # Validate if another player is not under bidding
     if PlayerInstance.objects.filter(status=PlayerInstance.BIDDING).exists():
         messages.error(request, 'A Bidding is in progress. Please let it finish to invite another player.')
@@ -445,23 +467,23 @@ def is_bidding_complete(player_instance):
 def member_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of member csv should be user, name, balance, color, bgcolor.',
+        'order': 'Order of members.csv should be user, name, balance, color, bgcolor.',
     }
 
     if request.method == "GET":
         return render(request, template, prompt)
+    #
+    # file = request.FILES.get('file', None)
+    #
+    # if file is None:
+    #     messages.error(request, "Please select a file to upload.")
+    #     return render(request, template, prompt)
+    #
+    # if not file.name.endswith('.csv'):
+    #     messages.error(request, "This file is not a .csv file.")
+    #     return render(request, template, prompt)
 
-    file = request.FILES.get('file', None)
-
-    if file is None:
-        messages.error(request, "Please select a file to upload.")
-        return render(request, template, prompt)
-
-    if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file.")
-        return render(request, template, prompt)
-
-    with open(file.name) as csv_file:
+    with open('members.csv') as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
     if csv_data[0] != ['user', 'name', 'balance', 'color', 'bgcolor']:
@@ -487,34 +509,31 @@ def member_upload(request):
 def player_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of player csv should be name, cost, base, team, country, type, score.',
+        'order': 'Order of players.csv should be name, cost, base, team, country, type.',
     }
 
     if request.method == "GET":
         return render(request, template, prompt)
 
-    file = request.FILES['file']
-
-    if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file.")
-        return render(request, template, prompt)
-
-    with open(file.name) as csv_file:
+    with open('players.csv') as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
-    if csv_data[0] != ['name', 'cost', 'base', 'team', 'country', 'type', 'score']:
+    if csv_data[0] != ['name', 'cost', 'base', 'team', 'country', 'type']:
         messages.error(request, "The csv header is not in the proper format.")
         return render(request, template, prompt)
 
     for column in csv_data[1:]:
+        try:
+            team = Team.objects.get(name=column[3])
+        except ObjectDoesNotExist:
+            team = None
         _, created = Player.objects.update_or_create(
             defaults={
                 'cost': column[1],
-                'base': column[2],
-                'team': column[3],
+                'iplbase': column[2],
+                'team': team,
                 'country': column[4],
                 'type': column[5],
-                'score': column[6],
                 },
             name=column[0]
         )
@@ -526,23 +545,13 @@ def player_upload(request):
 def update_scores(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of scores csv should be player, score.',
+        'order': 'Order of scores.csv should be player, score.',
     }
 
     if request.method == "GET":
         return render(request, template, prompt)
 
-    file = request.FILES.get('file', None)
-
-    if file is None:
-        messages.error(request, "Please select a file to upload.")
-        return render(request, template, prompt)
-
-    if not file.name.endswith('.csv'):
-        messages.error(request, 'This file is not a .csv file.')
-        return render(request, template, prompt)
-
-    with open(file.name) as csv_file:
+    with open('scores.csv') as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
     if csv_data[0] != ['player', 'score']:
@@ -568,19 +577,13 @@ def update_scores(request):
 def player_ownership_upload(request):
     template = "ipl2019/upload_csv.html"
     prompt = {
-        'order': 'Order of player ownership csv should be player, number, member, price.',
+        'order': 'Order of player_ownership.csv should be player, number, member, price.',
     }
 
     if request.method == "GET":
         return render(request, template, prompt)
 
-    file = request.FILES['file']
-
-    if not file.name.endswith('.csv'):
-        messages.error(request, "This file is not a .csv file.")
-        return render(request, template, prompt)
-
-    with open(file.name) as csv_file:
+    with open('player_ownership.csv') as csv_file:
         csv_data = list(csv.reader(csv_file, delimiter=','))
 
     if csv_data[0] != ['player', 'number', 'member', 'price']:
@@ -630,14 +633,6 @@ def reset(request):
     if request.method == "GET":
         return render(request, template, prompt)
 
-    # with open('members.csv') as csv_file:
-    #     member_data = list(csv.reader(csv_file, delimiter=','))
-    #
-    # if member_data[0] != ['user', 'name', 'balance', 'color', 'bgcolor']:
-    #     messages.error(request, 'The member.csv header is not in the proper format.')
-    #     messages.error(request, 'It needs to be in the order of user, name, balance, color, bgcolor')
-    #     return render(request, template, prompt)
-
     with open('players.csv') as csv_file:
         players_data = list(csv.reader(csv_file, delimiter=','))
 
@@ -653,26 +648,17 @@ def reset(request):
         messages.error(request, 'The player_ownership.csv header is not in the proper format.')
         return render(request, template, prompt)
 
-    # Upload Member Data
-    # for column in member_data[1:]:
-    #     try:
-    #         user = User.objects.get(username=column[0])
-    #         member = Member.objects.get(user=user.id)
-    #         member.name = column[1]
-    #         member.balance = column[2]
-    #         member.color = column[3]
-    #         member.bgcolor = column[4]
-    #         member.save()
-    #     except ObjectDoesNotExist:
-    #         pass
-
     # Upload Player Data
     for column in players_data[1:]:
+        try:
+            team = Team.objects.get(name=column[3])
+        except ObjectDoesNotExist:
+            team = None
         _, created = Player.objects.update_or_create(
             defaults={
                 'cost': column[1],
                 'iplbase': column[2],
-                'team': column[3],
+                'team': team,
                 'country': column[4],
                 'type': column[5],
             },
