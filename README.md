@@ -7,7 +7,7 @@ It is developed using Django framework and hosted on google app engine.
 ## Cloud SQL
 Turn on Cloud SQL in gcloud console.
 ```
-cloud_sql_proxy.exe -instances="super-ipl-league-2019:asia-south1:ipl"=tcp:3306
+cloud_sql_proxy.exe -instances="super-ipl-league-2019:asia-south1:ipl"=tcp:3306 -credential_file google-cloud-sql.json
 mysqlsh
 \c nayan@localhost:3306
 \sql

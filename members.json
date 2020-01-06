@@ -1,106 +1,119 @@
 [
   {
-    "user": "nz",
+    "username": "nz",
     "name": "Nayan Zaveri",
     "balance": 11,
     "color": "white",
     "bg_color": "black",
-    "points": 4301.0
+    "points": 4301.0,
+    "player_count": 33
   },
   {
-    "user": "rd",
+    "username": "rd",
     "name": "Ravi D'Lima",
     "balance": 17,
     "color": "white",
     "bg_color": "green",
-    "points": 4669.0
+    "points": 4669.0,
+    "player_count": 33
   },
   {
-    "user": "mb",
+    "username": "mb",
     "name": "Manish Bhatt",
     "balance": 9,
     "color": "white",
     "bg_color": "royalblue",
-    "points": 4229.5
+    "points": 4229.5,
+    "player_count": 24
   },
   {
-    "user": "nu",
+    "username": "nu",
     "name": "Nisha Udeshi",
     "balance": 4,
     "color": "white",
     "bg_color": "darkturquoise",
-    "points": 3675.5
+    "points": 3675.5,
+    "player_count": 26
   },
   {
-    "user": "fa",
+    "username": "fa",
     "name": "Faisal Ansari",
     "balance": 6,
     "color": "black",
     "bg_color": "yellow",
-    "points": 3975.5
+    "points": 3975.5,
+    "player_count": 19
   },
   {
-    "user": "sn",
+    "username": "sn",
     "name": "Samiksha Nalawade",
     "balance": 3,
     "color": "white",
     "bg_color": "darkblue",
-    "points": 3694.0
+    "points": 3694.0,
+    "player_count": 21
   },
   {
-    "user": "pp",
+    "username": "pp",
     "name": "Pranay Patil",
     "balance": 14,
     "color": "white",
     "bg_color": "purple",
-    "points": 2883.5
+    "points": 2883.5,
+    "player_count": 14
   },
   {
-    "user": "vp",
+    "username": "vp",
     "name": "Vinayak Patil",
     "balance": 18,
     "color": "white",
     "bg_color": "crimson",
-    "points": 3586.5
+    "points": 3586.5,
+    "player_count": 70
   },
   {
-    "user": "ag",
+    "username": "ag",
     "name": "Avinash Gaikwad",
     "balance": 5,
     "color": "black",
     "bg_color": "snow",
-    "points": 3123.5
+    "points": 3123.5,
+    "player_count": 37
   },
   {
-    "user": "sk",
+    "username": "sk",
     "name": "Shital Kathilkar",
     "balance": 0,
     "color": "white",
     "bg_color": "darkorange",
-    "points": 2494.5
+    "points": 2494.5,
+    "player_count": 14
   },
   {
-    "user": "pc",
+    "username": "pc",
     "name": "Priyanka Chhabria",
     "balance": 9,
     "color": "black",
     "bg_color": "lightgreen",
-    "points": 2573.0
+    "points": 2573.0,
+    "player_count": 13
   },
   {
-    "user": "rg",
+    "username": "rg",
     "name": "Rajashree Gaikwad",
     "balance": 8,
     "color": "white",
     "bg_color": "sienna",
-    "points": 2483.0
+    "points": 2483.0,
+    "player_count": 11
   },
   {
-    "user": "sa",
+    "username": "sa",
     "name": "Shraddha Ambre",
     "balance": 2,
     "color": "white",
     "bg_color": "violet",
-    "points": 1772.0
+    "points": 1772.0,
+    "player_count": 10
   }
 ]

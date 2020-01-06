@@ -11,3 +11,4 @@ test.adoc
 *.csv
 *.pdf
 cloud_sql_proxy.exe
+google-cloud-sql.json

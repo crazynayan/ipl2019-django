@@ -8,9 +8,10 @@ pis: List[PlayerInstance] = PlayerInstance.objects.all()
 
 def dm():
     members: List[Member] = Member.objects.all()
-    members: list = [{'user': m.user.username, 'name': m.name, 'balance': m.balance, 'color': m.color,
-                      'bg_color': m.bgcolor, 'points': float(sum(pi.player.score for pi in pis
-                                                                 if pi.member and pi.member.name == m.name))}
+    members: list = [{'username': m.user.username, 'name': m.name, 'balance': m.balance, 'color': m.color,
+                      'bg_color': m.bgcolor,
+                      'points': float(sum(pi.player.score for pi in pis if pi.member and pi.member.name == m.name)),
+                      'player_count': sum(1 for pi in pis if pi.member and pi.member.name == m.name)}
                      for m in members]
     with open('members.json', 'w') as file:
         json.dump(members, file, indent=2)
