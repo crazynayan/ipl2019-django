@@ -1,0 +1,106 @@
+[
+  {
+    "user": "nz",
+    "name": "Nayan Zaveri",
+    "balance": 11,
+    "color": "white",
+    "bg_color": "black",
+    "points": 4301.0
+  },
+  {
+    "user": "rd",
+    "name": "Ravi D'Lima",
+    "balance": 17,
+    "color": "white",
+    "bg_color": "green",
+    "points": 4669.0
+  },
+  {
+    "user": "mb",
+    "name": "Manish Bhatt",
+    "balance": 9,
+    "color": "white",
+    "bg_color": "royalblue",
+    "points": 4229.5
+  },
+  {
+    "user": "nu",
+    "name": "Nisha Udeshi",
+    "balance": 4,
+    "color": "white",
+    "bg_color": "darkturquoise",
+    "points": 3675.5
+  },
+  {
+    "user": "fa",
+    "name": "Faisal Ansari",
+    "balance": 6,
+    "color": "black",
+    "bg_color": "yellow",
+    "points": 3975.5
+  },
+  {
+    "user": "sn",
+    "name": "Samiksha Nalawade",
+    "balance": 3,
+    "color": "white",
+    "bg_color": "darkblue",
+    "points": 3694.0
+  },
+  {
+    "user": "pp",
+    "name": "Pranay Patil",
+    "balance": 14,
+    "color": "white",
+    "bg_color": "purple",
+    "points": 2883.5
+  },
+  {
+    "user": "vp",
+    "name": "Vinayak Patil",
+    "balance": 18,
+    "color": "white",
+    "bg_color": "crimson",
+    "points": 3586.5
+  },
+  {
+    "user": "ag",
+    "name": "Avinash Gaikwad",
+    "balance": 5,
+    "color": "black",
+    "bg_color": "snow",
+    "points": 3123.5
+  },
+  {
+    "user": "sk",
+    "name": "Shital Kathilkar",
+    "balance": 0,
+    "color": "white",
+    "bg_color": "darkorange",
+    "points": 2494.5
+  },
+  {
+    "user": "pc",
+    "name": "Priyanka Chhabria",
+    "balance": 9,
+    "color": "black",
+    "bg_color": "lightgreen",
+    "points": 2573.0
+  },
+  {
+    "user": "rg",
+    "name": "Rajashree Gaikwad",
+    "balance": 8,
+    "color": "white",
+    "bg_color": "sienna",
+    "points": 2483.0
+  },
+  {
+    "user": "sa",
+    "name": "Shraddha Ambre",
+    "balance": 2,
+    "color": "white",
+    "bg_color": "violet",
+    "points": 1772.0
+  }
+]

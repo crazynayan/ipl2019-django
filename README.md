@@ -20,6 +20,7 @@ select * from ipl2019_member;
 ```
 ## Application Deployment
 ```
+gcloud config set account nayanzaveri@gmail.com
 gcloud config set project super-ipl-league-2019
 gcloud info
 gcloud app describe
